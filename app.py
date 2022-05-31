@@ -2,7 +2,7 @@ from kivymd.app import MDApp
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.image import Image
+from kivy.uix.image import AsyncImage
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from DBClient import DBClient
@@ -29,7 +29,7 @@ class CloudWindow(Screen):
         filename = filename.decode()
         showed_filename = self.prepare_filename(filename)
         bl = BoxLayout(spacing=5, size_hint=(.1,.2), orientation="vertical")
-        bl.add_widget(Image(source=ig.grab_filepath(filename), keep_ratio=True, size_hint=(1,.5)))
+        bl.add_widget(AsyncImage(source=ig.grab_filepath(filename), keep_ratio=True, size_hint=(1,.5)))
         bl.add_widget(Label(font_name="lbrite", text=showed_filename, halign="center", valign="top", text_size = (bl.size[0], None),size_hint = (1, .5)))
         self.ids.files_stack.add_widget(bl)
         
@@ -63,8 +63,8 @@ class SafeCloudApp(MDApp):
         self.title = "Safe Cloud"
         super().__init__(**kwargs)
 
-    def build(self):
-        self.root = Builder.load_file("safecloud.kv")
+    # def build(self):
+    #     self.root = Builder.load_file("safecloud.kv")
 
 if __name__ == '__main__':
     SafeCloudApp().run()
