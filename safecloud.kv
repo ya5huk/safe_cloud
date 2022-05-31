@@ -1,16 +1,140 @@
-<Button>:
-    font_size: 20
-    color: 0.3,0.6,0.7,1
-    size_hint: 0.3, 0.5
+#:kivy 2.1.0
+#:import win kivy.core.window
+
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<BackgroundLabel@Label+BackgroundColor>
+    background_color: 0, 0, 0, 0
+
+<BackgroundImage@Image+BackgroundColor>
+    background_color: 0, 0, 0, 0
+
+<BackgroundBoxLayout@BoxLayout+BackgroundColor>
+    background_color: 0, 0, 0, 0
+
+WindowManager:
+    CloudWindow:
+    LoginWindow:
+    RegisterWindow:   
+
+<CloudWindow>:
+    MDScreen:
+        
+        md_bg_color: 73/255, 140/255, 125/255, 1
+        name: "cloudfiles"
+        
+        FloatLayout:
+
+            BackgroundLabel:
+                id: heading
+
+                text: "Your Files"
+
+                font_style: "H2"
+                font_name: "Gabriola"
+                
+                font_size: win.Window.size[1] / 10
+                size_hint: None, None
+                width: self.texture_size[0]
+                
+                pos_hint: {"center_x": 0.5, "center_y": 0.9}
+
+            StackLayout:
+                id: files_stack
+                padding: 20, 0, 20, 0
+                spacing: 20, 20
+                
+
+                # Calculation 0 + (heading_y + choice_to_father)/window_y (cuz it's rational)
+                pos_hint: {"y":  -(heading.size[1]+30)/win.Window.size[1]}
+
+                # File icons and names:
+                # BoxLayout:
+                #     size_hint: .1,.2
+                #     orientation: "vertical"
+                #     spacing: 5
+
+                #     Image:
+                #         id: blank
+                #         source: 'images/extension_icons/_blank.png'
+                #         keep_ratio: True
+                #         size_hint: 1, .5
+
+                #     Label:
+                #         font_name: "lbrite"
+                #         text: "sdasdfsdafdsafdsafsdfsdafadsad.txt" 
+                        
+                #         valign: "top"
+                #         halign: "center"
+                #         text_size: self.size
+                #         size_hint: 1, .5
+            
+             
+                
+            
+
+<LoginWindow>:
+    name: "login"
+    BoxLayout:
+        id: login_layout
+        orientation: 'vertical'
+        padding: [10,50,10,50]
+        spacing: 50
+
+        Label:
+            text: 'Welcome'
+            font_size: 32
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                text: 'Login'
+                font_size: 18
+                halign: 'left'
+                text_size: root.width-20, 20
+
+            TextInput:
+                id: login
+                multiline:False
+                font_size: 28
+
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Password'
+                halign: 'left'
+                font_size: 18
+                text_size: root.width-20, 20
+
+            TextInput:
+                id: password
+                multiline:False
+                password:True
+                font_size: 28
+
+        Button:
+            text: 'Connexion'
+            font_size: 24
+
+            on_press: root.do_login(login.text, password.text)
 
 
-<FloatLayout>:
+
+<RegisterWindow>:
+    name: "register"
+
     Button:
-        pos_hint: {"x": 0.5, "top": 1}
-        text: "Name or Email"
-    
-    Button:
-        id: btn
-        pos_hint: {"y": 0.3}
-        text: "Password" if btn.state == "normal" else "Down"
-        background_color: 0.3, .4, .5, 1
+        text: "Have an account"
+        on_release: 
+            app.root.current = "login"
+            root.manager.transition.direction = "right"
+
+
