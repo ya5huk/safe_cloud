@@ -5,11 +5,13 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
+from DBClient import DBClient
+from DBObjects import DBFile
 from IconGrabber import IconGrabber
 import os
 
 ig = IconGrabber('images/extension_icons/')
-
+db = DBClient('private/firestore_json.json')
 class LoginWindow(Screen):
     pass
 
@@ -20,19 +22,26 @@ class CloudWindow(Screen):
     def __init__(self, **kw):
         super(CloudWindow, self).__init__(**kw)
         Window.bind(on_drop_file=self.file_dropped)
-        Window.clearcolor = (73/255, 140/255, 125/255, 1)
         self.files_counter = 0
 
-    def file_dropped(self, window, filename, x, y, *args):
-        
-        showed_filename = self.prepare_filename(filename.decode())
+    def file_dropped(self, window, filename, x, y, *args):  
+        # Frontend
+        filename = filename.decode()
+        showed_filename = self.prepare_filename(filename)
         bl = BoxLayout(spacing=5, size_hint=(.1,.2), orientation="vertical")
-        bl.add_widget(Image(source=ig.grab_filepath(filename.decode()), keep_ratio=True, size_hint=(1,.5)))
+        bl.add_widget(Image(source=ig.grab_filepath(filename), keep_ratio=True, size_hint=(1,.5)))
         bl.add_widget(Label(font_name="lbrite", text=showed_filename, halign="center", valign="top", text_size = (bl.size[0], None),size_hint = (1, .5)))
         self.ids.files_stack.add_widget(bl)
         
         self.files_counter += 1
-    
+
+        # Backend
+
+        with open(filename, 'rb') as f:
+            fcontent = f.read()
+
+        db.add_file(DBFile(False, os.path.basename(filename), fcontent))
+
     @staticmethod
     def prepare_filename(filename: str):
         # Function for shortening too long filenames!
