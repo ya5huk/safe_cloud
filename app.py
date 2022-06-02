@@ -5,13 +5,13 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.image import AsyncImage
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
-from DBClient import DBClient
+from CloudServer import CloudServer, DBClient
 from DBObjects import DBFile
 from IconGrabber import IconGrabber
 import os
 
 ig = IconGrabber('images/extension_icons/')
-db = DBClient('private/firestore_json.json')
+cs = CloudServer('127.0.0.1', 8081)
 class LoginWindow(Screen):
     pass
 
