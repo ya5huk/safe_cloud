@@ -1,0 +1,27 @@
+{% extends "authbase.html" %}
+{% block content %}
+<style>
+  .form-control:focus {
+        border-color: #891a1a;
+        box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
+    } 
+</style>
+<form class="container d-flex flex-column align-items-center gap-3">
+  <div class="row w-50 form-group">
+    <label for="InputEmail">Email address</label>
+    <input type="email" class="form-control bg-transparent text-white" id="InputEmail" placeholder="Enter email">
+  </div>
+  <div class="row w-50 form-group">
+    <label for="InputUsername">Username</label>
+    <input type="text" maxlength="15" class="form-control bg-transparent text-white" id="InputUsername" placeholder="Enter username">
+  </div>
+  <div class="row w-50 form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" class="form-control bg-transparent text-white" id="exampleInputPassword1" placeholder="Password">
+  </div>
+  <div class="row w-10 form-group">
+
+  <button type="submit" class="btn text-white border-danger ">Submit</button>
+  </div>
+</form>
+{% endblock %}
