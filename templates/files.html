@@ -1,8 +1,109 @@
-{% extends "general.html" %}
-{% block title %} My files {% endblock %}
-{% block content %} 
+{% extends "general.html" %} {% block title %} My files {% endblock %} {% block
+content %}
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    margin-top: 1rem;
+  }
+
+  .droparea {
+    margin: 1rem auto;
+
+    width: 384px;
+    max-width: 100%;
+    height: 160px;
+    border: 4px dashed grey;
+    border-radius: 15px;
+  }
+
+  .selectarea {
+    background-color: #292b2c;
+  }
+</style>
 <div class="d-flex justify-content-center pt-3">
   <h1 class="display-3 text-white">My files</h1>
 </div>
+<section class="d-flex align-items-center justify-content-center droparea">
+  <p class="text-white lead user-select-none" id="section-text">
+    Drop file to the lab 🔬
+  </p>
+</section>
+<script>
+  // thanks to https://www.youtube.com/watch?v=9Xh_ZpFkROI
 
+  const initApp = () => {
+    const droparea = document.querySelector(".droparea");
+
+    // Color border
+    const active = () => {
+      droparea.classList.add("selectarea");
+      document.getElementById("section-text").innerHTML = "right here buddy";
+    };
+
+    const inactive = () => {
+      droparea.classList.remove("selectarea");
+      document.getElementById("section-text").innerHTML =
+        "Drop file to the lab 🔬";
+    };
+
+    // Prevent default reload for all file-related events
+    const prevents = (e) => e.preventDefault();
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((evtName) => {
+      droparea.addEventListener(evtName, prevents);
+    });
+
+    ["dragenter", "dragover"].forEach((evtName) => {
+      droparea.addEventListener(evtName, active);
+    });
+
+    ["dragleave", "drop"].forEach((evtName) => {
+      droparea.addEventListener(evtName, inactive);
+    });
+
+    droparea.addEventListener("drop", handleDrop);
+  };
+
+  document.addEventListener("DOMContentLoaded", initApp);
+
+  const handleDrop = (e) => {
+    const dt = e.dataTransfer;
+    const files = [...dt.files];
+
+    for (const file of files) {
+      var reader = new FileReader();
+      const name = file.name;
+      reader.readAsArrayBuffer(file);
+      reader.onload = (evt) => {
+        const content = evt.target.result;
+        // Here we got content and name to send
+        formData = new FormData();
+        formData.append("file", new Blob([content]), name);
+
+        $(document).ready(() => {
+          $.ajax({
+            url: "/files",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+          });
+        });
+      };
+      reader.onerror = (err) => {
+        console.log(err);
+      };
+    }
+  };
+</script>
 {% endblock %}
