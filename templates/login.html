@@ -1,23 +1,31 @@
-{% extends "authbase.html" %}
-{% block content %}
+{% extends "authbase.html" %} {% block content %}
 <style>
   .form-control:focus {
-        border-color: #891a1a;
-        box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
-    } 
+    border-color: #891a1a;
+    box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
+  }
 </style>
 <form class="container d-flex flex-column align-items-center gap-3">
-  <div class="row w-50 form-group gap-1">
+  <div class="row w-50 form-group gap-2">
     <label for="InputEmail">Username or Email address</label>
-    <input type="email" class="form-control bg-transparent text-white" id="InputEmail" placeholder="Either ur name or @ smthin'">
+    <input
+      type="email"
+      class="form-control bg-transparent text-white"
+      id="InputEmail"
+      placeholder="Either ur name or @ smthin'"
+    />
   </div>
-  <div class="row w-50 form-group gap-1">
+  <div class="row w-50 form-group gap-2">
     <label for="exampleInputPassword1">Password</label>
-    <input type="password" class="form-control bg-transparent text-white" id="exampleInputPassword1" placeholder="I'm blind">
+    <input
+      type="password"
+      class="form-control bg-transparent text-white"
+      id="exampleInputPassword1"
+      placeholder="I'm blind"
+    />
   </div>
   <div class="row w-10 form-group">
-
-  <button type="submit" class="btn text-white border-danger ">Submit</button>
+    <button type="submit" class="btn text-white border-danger">Submit</button>
   </div>
 </form>
 {% endblock %}
