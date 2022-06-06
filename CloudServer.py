@@ -57,7 +57,7 @@ class CloudServer:
                     case Codes.ADD_FILE:
                         self.add_file(conn, db)
                     case Codes.GET_FILE_CONTENT:
-                        self.send_file_content()
+                        self.send_file_content(conn, db)
                     case _:
                         pass
         except Exception as e:
@@ -159,7 +159,7 @@ class CloudClient:
             content += self.sock.recv(1024)
             bytes_read += 1024
         
-        return content
+        return base64.b64encode(content) # b64 is more web-friendly
 
         
     

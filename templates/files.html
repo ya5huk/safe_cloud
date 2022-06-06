@@ -40,7 +40,7 @@ content %}
   </section>
 </div>
 <ul class="d-flex flex-wrap gap-5" id="files-list">
-  <li style="width: 70px" id="filetemplate">
+  <li style="width: 70px" id="filetemplate" hidden>
     <div class="d-flex align-items-center card bg-transparent border-0">
       <img id="filetemplate-img" class="card-img-top" src="static/_blank.png" />
       <div class="card-body p-0 pt-1">
@@ -58,12 +58,16 @@ content %}
         <button
           class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
           style="width: 40%"
+          id="delete-button-template"
+          onclick="deleteFile(this.id)"
         >
           <img src="static/bin.png" width="100%" />
         </button>
         <button
           class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
           style="width: 40%"
+          id="download-button-template"
+          onclick="downloadFile(this.id)"
         >
           <img src="static/download_icon.png" width="100%" />
         </button>
@@ -132,19 +136,33 @@ content %}
             contentType: false,
             success: (res) => {
               const filesList = document.getElementById("files-list");
-              // Copy hidden list item into li
+              // Copy hidden list item into li (prepared for file visuals)
               const li = document
                 .getElementById("filetemplate")
                 .cloneNode(true);
               li.hidden = false;
 
-              liParagraph = li.querySelectorAll('[id="filetemplateText"]')[0];
+              // Customizing objects -> filenames, fileicons, ext...
+              const liParagraph = li.querySelectorAll(
+                '[id="filetemplateText"]'
+              )[0];
               liParagraph.innerHTML = res.filename;
               liParagraph.id = `${res.filename}-file-body`;
 
-              liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
+              const liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
               liImage.src = `data:image/png;base64, ${res.data}`;
               liImage.id = `${res.filename}-file-icon`;
+
+              // To enable frontend know what file he needs for this operations
+              const liDownloadButton = li.querySelectorAll(
+                '[id="download-button-template"]'
+              )[0];
+              liDownloadButton.id = `${res.filename}-download-button`;
+              const liDeleteButton = li.querySelectorAll(
+                '[id="delete-button-template"]'
+              )[0];
+              liDeleteButton.id = `${res.filename}-delete-button`;
+
               // li.textContent = returnedFilename;
               filesList.appendChild(li);
             },
@@ -155,6 +173,52 @@ content %}
         console.log(err);
       };
     }
+  };
+
+  // A code to create temp a link to download file
+  // https://stackoverflow.com/a/36899900/12432147
+  function saveData(name, type, data) {
+    // for new ie
+    if (data !== null && navigator.msSaveBlob)
+      return navigator.msSaveBlob(new Blob([data], { type: type }), name);
+
+    var a = $("<a style='display: none;'/>");
+    var url = window.URL.createObjectURL(new Blob([data], { type: type }));
+    a.attr("href", url);
+    a.attr("download", name);
+    $("body").append(a);
+    a[0].click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  }
+
+  const downloadFile = (id) => {
+    // Finding filename & extension from set id
+    filename = id.slice(0, id.length - "-download-button".length);
+    sliced = filename.split(".");
+    extension = sliced[sliced.length - 1];
+
+    $.ajax({
+      url: `/files/download/${filename}`,
+      type: "GET",
+      success: (res) => {
+        // Convert base64 to blob
+        const byteCharacters = atob(res);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: extension });
+        saveData(filename, `data:${extension}`, blob);
+      },
+    });
+  };
+
+  const deleteFile = (id) => {
+    filename = id.slice(0, id.length - "-delete-button".length);
+
+    console.log(filename);
   };
 </script>
 {% endblock %}
