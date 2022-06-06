@@ -10,6 +10,7 @@ import base64
 class Codes:
     ADD_FILE = '101'
     GET_FILE_CONTENT = '102'
+    DELETE_FILE = '103'
 
 MAX_FILENAME_SIZE = 50
 
@@ -58,6 +59,8 @@ class CloudServer:
                         self.add_file(conn, db)
                     case Codes.GET_FILE_CONTENT:
                         self.send_file_content(conn, db)
+                    case Codes.DELETE_FILE:
+                        self.delete_file(conn, db)
                     case _:
                         pass
         except Exception as e:
@@ -118,6 +121,11 @@ class CloudServer:
         conn.send(zero_message(len(content), 32).encode())
         conn.send(content)
 
+    @staticmethod
+    def delete_file(conn: socket.socket, db: DBCommands):
+        filename = conn.recv(MAX_FILENAME_SIZE).decode()
+        db.remove_file(filename)
+
 class CloudClient:
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -160,8 +168,10 @@ class CloudClient:
             bytes_read += 1024
         
         return base64.b64encode(content) # b64 is more web-friendly
-
-        
+    
+    def delete_file(self, filename: str):
+        self.sock.send(Codes.DELETE_FILE.encode())
+        self.sock.send(filename.encode())
     
 
 def zero_message(num: int, digits_num: int):

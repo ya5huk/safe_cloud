@@ -141,6 +141,7 @@ content %}
                 .getElementById("filetemplate")
                 .cloneNode(true);
               li.hidden = false;
+              li.id = `${res.filename}-list-item`;
 
               // Customizing objects -> filenames, fileicons, ext...
               const liParagraph = li.querySelectorAll(
@@ -217,8 +218,17 @@ content %}
 
   const deleteFile = (id) => {
     filename = id.slice(0, id.length - "-delete-button".length);
-
-    console.log(filename);
+    $.ajax({
+      url: `/files/delete/${filename}`,
+      type: "GET",
+      success: (res) => {
+        // Deleting visually (After serverside deletion already done)
+        document.getElementById(`${filename}-list-item`).remove();
+      },
+      error: (err) => {
+        console.log(`Error deleting: ${err}`);
+      },
+    });
   };
 </script>
 {% endblock %}

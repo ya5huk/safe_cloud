@@ -27,8 +27,8 @@ class DBCommands:
         (file.file_id, '1' if file.in_dir else '0', file.name, file.content, str(file.added_date.strftime("%d/%m/%Y, %H:%M:%S"))))
         self.db_con.commit()
 
-    def remove_file(self, file_id: str):
-        self.cur.execute(f'''DELETE FROM files WHERE file_id == {file_id}''')
+    def remove_file(self, filename: str):
+        self.cur.execute(f'''DELETE FROM files WHERE name=:filename''', {'filename': filename})
         self.db_con.commit()
     
     def get_file_content(self, filename: str):
@@ -47,5 +47,5 @@ class DBCommands:
 
 if __name__ == "__main__":
     db = DBCommands('./user.db')
-    print(db.get_file_content('bin.png'))
+    print(db.remove_file('252-7BD3B (1).pdf'))
     

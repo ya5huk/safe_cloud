@@ -65,9 +65,14 @@ def files():
 def download_file(filename: str):
     content = cc.get_file(filename)
     return content
-    # Everything is set up except
-    # Get filename data to button so it can send POST
-    # to here and receive (download) the file
+
+@app.route('/files/delete/<filename>')
+def delete_file(filename: str):
+    cc.delete_file(filename)
+    filenames.remove(filename)
+    # Doesn't really matter if we didn't delete something that didn't exist
+    return jsonify({'message': 'Delete occurred'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
