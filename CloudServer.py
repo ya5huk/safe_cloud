@@ -57,7 +57,7 @@ class CloudServer:
                     case Codes.ADD_FILE:
                         self.add_file(conn, db)
                     case Codes.GET_FILE_CONTENT:
-                        self.send_file_content(filename)
+                        self.send_file_content()
                     case _:
                         pass
         except Exception as e:
@@ -112,8 +112,12 @@ class CloudServer:
         conn.send(icon_content)
     
     @staticmethod
-    def send_file_content(conn: socket.socket, filenames: str):
-        conn.recv(MAX_FILENAME_SIZE)
+    def send_file_content(conn: socket.socket, db: DBCommands):
+        filename = conn.recv(MAX_FILENAME_SIZE).decode()
+        content = db.get_file_content(filename)
+        conn.send(zero_message(len(content), 32).encode())
+        conn.send(content)
+
 class CloudClient:
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -147,6 +151,15 @@ class CloudClient:
     def get_file(self, filename: str):
         self.sock.send(Codes.GET_FILE_CONTENT.encode())
         self.sock.send(filename.encode())
+
+        content_size = int(self.sock.recv(32).decode())
+        content = bytes()
+        bytes_read = 0
+        while bytes_read < content_size:
+            content += self.sock.recv(1024)
+            bytes_read += 1024
+        
+        return content
 
         
     

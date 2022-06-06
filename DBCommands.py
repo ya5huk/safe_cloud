@@ -31,6 +31,12 @@ class DBCommands:
         self.cur.execute(f'''DELETE FROM files WHERE file_id == {file_id}''')
         self.db_con.commit()
     
+    def get_file_content(self, filename: str):
+        self.cur.execute(f'''SELECT content FROM files WHERE name=:filename''', {'filename': filename})
+        content = self.cur.fetchall()[0][0] # If more than a file popps up, that is a problem
+        return content # Bytes of the file
+        
+    
 
     def close(self):
         self.cur.close()
@@ -40,5 +46,6 @@ class DBCommands:
         
 
 if __name__ == "__main__":
-    db = DBCommands()
+    db = DBCommands('./user.db')
+    print(db.get_file_content('bin.png'))
     

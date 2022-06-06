@@ -55,18 +55,26 @@ content %}
       <div
         class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0"
       >
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
-          style="width: 40%"
-        >
-          <img src="static/bin.png" width="100%" />
-        </button>
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
-          style="width: 40%"
-        >
-          <img src="static/download_icon.png" width="100%" />
-        </button>
+        <form>
+          <button
+            class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
+            style="width: 40%"
+            name="delete_file"
+            value="delete_file"
+          >
+            <img src="static/bin.png" width="100%" />
+          </button>
+        </form>
+        <form action="" method="post">
+          <button
+            class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
+            style="width: 40%"
+            name="download_file"
+            value="download_file"
+          >
+            <img src="static/download_icon.png" width="100%" />
+          </button>
+        </form>
       </div>
     </div>
   </li>

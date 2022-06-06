@@ -49,9 +49,12 @@ def files():
     return render_template('files.html')
 
 @app.route('/files/download/<filename>')
-def download_file(filename):
-    cc.get
-
+def download_file(filename: str):
+    content = cc.get_file(filename)
+    return content
+    # Everything is set up except
+    # Get filename data to button so it can send POST
+    # to here and receive (download) the file
 
 if __name__ == '__main__':
     app.run(debug=True)
