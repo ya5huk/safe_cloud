@@ -9,8 +9,9 @@ import base64
 
 class Codes:
     ADD_FILE = '101'
-    GET_FILE_ICON = '102'
+    GET_FILE_CONTENT = '102'
 
+MAX_FILENAME_SIZE = 50
 
 class CloudServer:
     def __init__(self, ip: str, port: int):
@@ -55,6 +56,8 @@ class CloudServer:
                 match op_code.decode():
                     case Codes.ADD_FILE:
                         self.add_file(conn, db)
+                    case Codes.GET_FILE_CONTENT:
+                        self.send_file_content(filename)
                     case _:
                         pass
         except Exception as e:
@@ -107,7 +110,10 @@ class CloudServer:
         
         conn.send(zero_message(len(icon_content), 32).encode())
         conn.send(icon_content)
-
+    
+    @staticmethod
+    def send_file_content(conn: socket.socket, filenames: str):
+        conn.recv(MAX_FILENAME_SIZE)
 class CloudClient:
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -137,6 +143,10 @@ class CloudClient:
         # turn file_icon_data into base64 because web only knows how to deal
         # with base64
         return base64.b64encode(file_icon_data)
+    
+    def get_file(self, filename: str):
+        self.sock.send(Codes.GET_FILE_CONTENT.encode())
+        self.sock.send(filename.encode())
 
         
     

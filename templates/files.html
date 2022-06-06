@@ -40,14 +40,10 @@ content %}
   </section>
 </div>
 <ul class="d-flex flex-wrap gap-5" id="files-list">
-  <li style="width: 70px" id="filetemplate" hidden>
+  <li style="width: 70px" id="filetemplate">
     <div class="d-flex align-items-center card bg-transparent border-0">
-      <img
-        id="filetemplate-img"
-        class="card-img-top"
-        src="static/images/extension_icons/_blank.png"
-      />
-      <div class="card-body">
+      <img id="filetemplate-img" class="card-img-top" src="static/_blank.png" />
+      <div class="card-body p-0 pt-1">
         <p
           class="card-text text-white lead overflow-auto"
           style="font-size: 15px"
@@ -55,6 +51,22 @@ content %}
         >
           filename.txt
         </p>
+      </div>
+      <div
+        class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0"
+      >
+        <button
+          class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
+          style="width: 40%"
+        >
+          <img src="static/bin.png" width="100%" />
+        </button>
+        <button
+          class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
+          style="width: 40%"
+        >
+          <img src="static/download_icon.png" width="100%" />
+        </button>
       </div>
     </div>
   </li>
@@ -126,12 +138,13 @@ content %}
                 .cloneNode(true);
               li.hidden = false;
 
-              li.querySelectorAll('[id="filetemplateText"]')[0].innerHTML =
-                name;
+              liParagraph = li.querySelectorAll('[id="filetemplateText"]')[0];
+              liParagraph.innerHTML = res.filename;
+              liParagraph.id = `${res.filename}-file-body`;
 
-              li.querySelectorAll(
-                '[id="filetemplate-img"]'
-              )[0].src = `data:image/png;base64, ${res}`;
+              liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
+              liImage.src = `data:image/png;base64, ${res.data}`;
+              liImage.id = `${res.filename}-file-icon`;
               // li.textContent = returnedFilename;
               filesList.appendChild(li);
             },
