@@ -5,9 +5,11 @@ import uuid
 import socket
 import threading
 import os
+import base64
 
 class Codes:
     ADD_FILE = '101'
+    GET_FILE_ICON = '102'
 
 
 class CloudServer:
@@ -87,6 +89,25 @@ class CloudServer:
         print('Adding file: ', file)
         db.add_file(file)
 
+        # After file is added, send back the icon to the client
+        # so website will show file's added icon
+        
+        ext = filename.split('.')[-1]
+        default_path = 'D:\\USER\\Desktop\\safe_cloud\\images\\extension_icons\\_blank.png'
+        desired_path = f'D:\\USER\\Desktop\\safe_cloud\\images\\extension_icons\\{ext}.png'
+        
+        if os.path.exists(desired_path):
+            final_path = desired_path
+        else:
+            final_path = default_path
+        
+        with open(final_path, 'rb') as f:
+            icon_content = f.read()
+        
+        
+        conn.send(zero_message(len(icon_content), 32).encode())
+        conn.send(icon_content)
+
 class CloudClient:
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -104,6 +125,19 @@ class CloudClient:
         self.sock.send(filename.encode())
         self.sock.send(zero_message(len(content), 32).encode()) # 2^32 bytes = about 4 GB's max
         self.sock.send(content)
+
+        file_icon_size = int(self.sock.recv(32).decode())
+        file_icon_data = bytes()
+        bytes_read = 0
+        
+        while bytes_read < file_icon_size:
+            file_icon_data += self.sock.recv(1024)
+            bytes_read += 1024
+        
+        # turn file_icon_data into base64 because web only knows how to deal
+        # with base64
+        return base64.b64encode(file_icon_data)
+
         
     
 

@@ -18,8 +18,6 @@ content %}
   }
 
   .droparea {
-    margin: 1rem auto;
-
     width: 384px;
     max-width: 100%;
     height: 160px;
@@ -31,16 +29,39 @@ content %}
     background-color: #292b2c;
   }
 </style>
-<div class="d-flex justify-content-center pt-3">
-  <h1 class="display-3 text-white">My files</h1>
+<div class="container d-flex align-items-center justify-content-around my-5">
+  <div class="d-flex justify-content-center pt-3">
+    <h1 class="display-3 text-white">My files</h1>
+  </div>
+  <section class="d-flex align-items-center justify-content-center droparea">
+    <p class="text-white lead user-select-none" id="section-text">
+      Drop file to the lab 🔬
+    </p>
+  </section>
 </div>
-<section class="d-flex align-items-center justify-content-center droparea">
-  <p class="text-white lead user-select-none" id="section-text">
-    Drop file to the lab 🔬
-  </p>
-</section>
+<ul class="d-flex flex-wrap gap-5" id="files-list">
+  <li style="width: 70px" id="filetemplate" hidden>
+    <div class="d-flex align-items-center card bg-transparent border-0">
+      <img
+        id="filetemplate-img"
+        class="card-img-top"
+        src="static/images/extension_icons/_blank.png"
+      />
+      <div class="card-body">
+        <p
+          class="card-text text-white lead overflow-auto"
+          style="font-size: 15px"
+          id="filetemplateText"
+        >
+          filename.txt
+        </p>
+      </div>
+    </div>
+  </li>
+</ul>
 <script>
   // thanks to https://www.youtube.com/watch?v=9Xh_ZpFkROI
+  const getImageByName = (filename) => {};
 
   const initApp = () => {
     const droparea = document.querySelector(".droparea");
@@ -97,6 +118,23 @@ content %}
             data: formData,
             processData: false,
             contentType: false,
+            success: (res) => {
+              const filesList = document.getElementById("files-list");
+              // Copy hidden list item into li
+              const li = document
+                .getElementById("filetemplate")
+                .cloneNode(true);
+              li.hidden = false;
+
+              li.querySelectorAll('[id="filetemplateText"]')[0].innerHTML =
+                name;
+
+              li.querySelectorAll(
+                '[id="filetemplate-img"]'
+              )[0].src = `data:image/png;base64, ${res}`;
+              // li.textContent = returnedFilename;
+              filesList.appendChild(li);
+            },
           });
         });
       };

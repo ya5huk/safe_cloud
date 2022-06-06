@@ -1,9 +1,10 @@
-from flask import Flask, redirect, url_for, render_template, request as rq
+from flask import Flask, jsonify, redirect, url_for, render_template, request as rq
 from CloudServer import CloudClient
 import io 
 
 app = Flask(__name__)
 cc = CloudClient('127.0.0.1', 8081)
+filenames = []
 
 # @app.route('/')
 # def home():
@@ -23,13 +24,19 @@ def login():
 
 @app.route('/files', methods=['POST', 'GET'])
 def files():
+    
     if rq.method == 'POST':
         
         file = rq.files['file']
         
         content = file.stream.read()  # Send stream over a socket
-        cc.send_file(False, file.filename, content)
+        file_icon_data = cc.send_file(False, file.filename, content)
+        filenames.append(file.filename)
+        
+        return file_icon_data.decode()
+
     return render_template('files.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
