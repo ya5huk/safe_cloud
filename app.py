@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, redirect, url_for, render_template, request as rq
 from CloudServer import CloudClient
-import io 
+import hashlib 
 import re
 
 app = Flask(__name__)
@@ -21,8 +21,15 @@ def register():
         email = rq.form['email']
         username = rq.form['username']
         password = rq.form['password']
-        print(email, username, password)
-
+        user_id = hashify_user(email, username, password)
+        
+        ans = cc.handle_register(user_id, username, email)
+        print(ans)
+        if ans['code'] == 'success':
+            return redirect(url_for('login'))
+        else:
+            
+            return render_template('register.html', err_msg=ans['msg'])
 
     return render_template('register.html')
 
@@ -95,6 +102,13 @@ def delete_file(filename: str):
 # must affect user's files list 
 # 4. Add a profile page with all the needed details and LOG OUT button (important!)
 # 5. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
+
+def hashify_user(email: str, username: str, password: str):
+    # Using email because it is unique and password/username
+    # for more unbreakable id
+    mixed_str = username[::-2] + password[::-1] + email*5
+    user_id = hashlib.sha256(mixed_str.encode()).hexdigest()
+    return user_id
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -35,7 +35,10 @@ class DBCommands:
     
     def get_file_content(self, filename: str):
         self.cur.execute(f'''SELECT content FROM files WHERE name=:filename''', {'filename': filename})
-        content = self.cur.fetchall()[0][0] # If more than a file popps up, that is a problem
+        ans = self.cur.fetchall()
+        if len(ans) == 0:
+            return None
+        content = ans[0][0] # If more than a file popps up, that is a problem
         return content # Bytes of the file
         
     # Users
@@ -56,10 +59,21 @@ class DBCommands:
 
     def get_user_details_by_id(self, id: str):
         self.cur.execute(f'''SELECT * FROM users WHERE user_id=:id''', {'id': id})
-        user = self.cur.fetchall()[0] # Should be only one user
+        ans = self.cur.fetchall()
+        if len(ans) == 0:
+            return None
+
+        user = ans[0] # Should be only one user
         userid, username, email, creation_date, files = user # Splitting the tuple
         return DBUser(id, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
+    def check_email_existance(self, email: str):
+        self.cur.execute(f'''SELECT * FROM users WHERE email=:email''', {'email': email})
+        ans = self.cur.fetchall()
+        if len(ans) == 0: # empty list = no accounts
+            return False
+        return True
+    
 
     def close(self):
         self.cur.close()
@@ -71,11 +85,5 @@ class DBCommands:
 if __name__ == "__main__":
     db = DBCommands('./user.db')
     db.create_tables()
-    id = '1156a4sdf'
-    usr = db.get_user_details_by_id(id)
-    newUsr = usr
-    newUsr.user_id = 'asdadsf'
-    newUsr.username = 'topo'
-    db.remove_user_by_username('topo')
-    print(usr.creation_date, usr.email, usr.files, usr.user_id, usr.username)
+    print(db.check_email_existance('adsm@sad.c'))
     

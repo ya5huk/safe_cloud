@@ -5,44 +5,53 @@
     box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
   }
 </style>
-<form
-  class="container d-flex flex-column align-items-center gap-3"
-  action="#"
-  method="post"
->
-  <div class="row w-50 form-group gap-2">
-    <label for="InputEmail">Email address</label>
-    <input
-      type="email"
-      name="email"
-      class="form-control bg-transparent text-white"
-      id="InputEmail"
-      placeholder="That thing with @"
-    />
-  </div>
-  <div class="row w-50 form-group gap-2">
-    <label for="InputUsername">Username</label>
-    <input
-      name="username"
-      type="text"
-      maxlength="15"
-      class="form-control bg-transparent text-white"
-      id="InputUsername"
-      placeholder="How u call urself?"
-    />
-  </div>
-  <div class="row w-50 form-group gap-2">
-    <label for="InputPass">Password</label>
-    <input
-      name="password"
-      type="password"
-      class="form-control bg-transparent text-white"
-      id="InputPass"
-      placeholder="Won't see it anyway"
-    />
-  </div>
-  <div class="row w-10 form-group">
-    <button type="submit" class="btn text-white border-danger">Submit</button>
-  </div>
-</form>
+<div class="d-flex justify-content-center">
+  <form
+    class="d-flex flex-column align-items-center lead gap-3"
+    style="width: 30%"
+    action="#"
+    method="post"
+  >
+    <div class="w-100 form-group gap-2">
+      <label for="InputEmail">Email address</label>
+      <input
+        type="email"
+        name="email"
+        class="form-control bg-transparent text-white"
+        id="InputEmail"
+        placeholder="That thing with @"
+      />
+    </div>
+    <div class="w-100 form-group gap-2">
+      <label for="InputUsername">Username</label>
+      <input
+        name="username"
+        type="text"
+        maxlength="15"
+        class="form-control bg-transparent text-white"
+        id="InputUsername"
+        placeholder="How u call urself?"
+      />
+    </div>
+    <div class="w-100 form-group gap-2">
+      <label for="InputPass">Password</label>
+      <input
+        name="password"
+        type="password"
+        class="form-control bg-transparent text-white"
+        id="InputPass"
+        placeholder="Won't see it anyway"
+      />
+    </div>
+    <div
+      class="d-flex w-100 align-items-center justify-content-between form-group"
+    >
+      <p class="form-text text-danger">{{err_msg}}</p>
+      <button type="submit" class="btn btn-sm text-white fs-6 border-danger">
+        Submit
+      </button>
+    </div>
+  </form>
+</div>
+
 {% endblock %}

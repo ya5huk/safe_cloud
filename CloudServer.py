@@ -1,6 +1,7 @@
 from datetime import datetime
+import json
 from DBCommands import DBCommands
-from DBObjects import DBFile
+from DBObjects import DBFile, DBUser
 import uuid
 import socket
 import threading
@@ -11,6 +12,8 @@ class Codes:
     ADD_FILE = '101'
     GET_FILE_CONTENT = '102'
     DELETE_FILE = '103'
+
+    REGISTER_USER = '201'
 
 MAX_FILENAME_SIZE = 50
 
@@ -61,6 +64,8 @@ class CloudServer:
                         self.send_file_content(conn, db)
                     case Codes.DELETE_FILE:
                         self.delete_file(conn, db)
+                    case Codes.REGISTER_USER:
+                        self.try_register(conn, db)
                     case _:
                         pass
         except Exception as e:
@@ -118,6 +123,9 @@ class CloudServer:
     def send_file_content(conn: socket.socket, db: DBCommands):
         filename = conn.recv(MAX_FILENAME_SIZE).decode()
         content = db.get_file_content(filename)
+        if content == None:
+            print("Didn't receive anything from file, should get an error")
+
         conn.send(zero_message(len(content), 32).encode())
         conn.send(content)
 
@@ -125,6 +133,40 @@ class CloudServer:
     def delete_file(conn: socket.socket, db: DBCommands):
         filename = conn.recv(MAX_FILENAME_SIZE).decode()
         db.remove_file(filename)
+
+    @staticmethod
+    def try_register(conn: socket.socket, db: DBCommands):
+        # Data receiving: email -> username -> id
+        email_size = int(conn.recv(32).decode())
+        email = conn.recv(email_size).decode()
+
+        if db.check_email_existance(email): 
+            print(email, 'already exists!')
+            data = ''
+            while data:
+                data = conn.recv(1024) # Just empty socket because error can already be sent
+            print('around ')
+            msg = json.dumps({'code': 'fail', 'msg': f'{email} already exists!'})
+            print(msg)
+            conn.send(zero_message(len(msg), 32).encode())
+            conn.send(msg.encode())
+            return
+
+        username_size = int(conn.recv(32).decode())
+        username = conn.recv(username_size).decode()
+
+        user_size = int(conn.recv(32).decode())
+        user_id = conn.recv(user_size).decode()
+
+        # Generate id
+        
+        usr = DBUser(user_id, username, email, datetime.now(), [])
+        
+        db.add_user(usr)
+
+        msg = json.dumps({'code': 'success', 'msg': ''})
+        conn.send(zero_message(len(msg.encode()), 32).encode())
+        conn.send(msg.encode())
 
 class CloudClient:
     def __init__(self, ip: str, port: int):
@@ -172,6 +214,29 @@ class CloudClient:
     def delete_file(self, filename: str):
         self.sock.send(Codes.DELETE_FILE.encode())
         self.sock.send(filename.encode())
+    
+    def handle_register(self, user_id: str, username: str, email: str):
+        # user_id is already hashed so it is bytes
+        
+        # Send data
+        self.sock.send(Codes.REGISTER_USER.encode())
+        
+        self.sock.send(zero_message(len(email), 32).encode())
+        self.sock.send(email.encode())
+
+        self.sock.send(zero_message(len(username), 32).encode())
+        self.sock.send(username.encode())
+
+        self.sock.send(zero_message(len(user_id), 32).encode())
+        self.sock.send(user_id.encode())
+
+        print('here')
+        # Receive answer
+        msg_size = int(self.sock.recv(32).decode())
+        print(msg_size)
+        msg = json.loads(self.sock.recv(msg_size).decode())
+        print(msg)
+        return msg
     
 
 def zero_message(num: int, digits_num: int):
