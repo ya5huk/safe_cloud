@@ -6,7 +6,7 @@ from DBObjects import DBFile, DBUser
 class DBCommands:
     def __init__(self, db_file_path: str):
         self.db_file_path = db_file_path
-        self.db_con = sqlite3.connect(db_file_path)
+        self.db_con = sqlite3.connect(db_file_path, check_same_thread=False)
         self.cur = self.db_con.cursor() # Will be used to operate in db
     
     def create_tables(self):

@@ -1,10 +1,13 @@
 from flask import Flask, jsonify, redirect, url_for, render_template, request as rq
-from CloudServer import CloudClient
+from CloudServer import CloudServer
 import hashlib 
-import re
+import re, os
+
+DB_FILENAME = os.path.abspath('./database.db')
+EXTENSION_ICONS_PATH = os.path.abspath('./images/extension_icons') + '/'
 
 app = Flask(__name__)
-cc = CloudClient('127.0.0.1', 8081)
+cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
 filenames = [] # All the user's filenames (should be fetched on load and updated)
 
 # @app.route('/')
@@ -23,9 +26,9 @@ def register():
         password = rq.form['password']
         user_id = hashify_user(email, username, password)
         
-        ans = cc.handle_register(user_id, username, email)
-        print(ans)
+        ans = cs.try_register(user_id, username, email)
         if ans['code'] == 'success':
+            # Create a database
             return redirect(url_for('login'))
         else:
             
@@ -48,7 +51,6 @@ def files():
     if rq.method == 'POST':
         
         file = rq.files['file']
-        
         content = file.stream.read()  # Send stream over a socket
 
         # Code to manage duplicated files 
@@ -74,7 +76,7 @@ def files():
             saved_filename = f'{actual_name} ({occurrences}).{ext}'
             filenames.append(saved_filename)
         
-        file_icon_data = cc.send_file(False, saved_filename, content)
+        file_icon_data = cs.add_file(False, saved_filename, content)
         
         return jsonify({'data': file_icon_data.decode(), 'filename': saved_filename})
 
@@ -82,12 +84,12 @@ def files():
 
 @app.route('/files/download/<filename>')
 def download_file(filename: str):
-    content = cc.get_file(filename)
+    content = cs.return_file_content(filename)
     return content
 
 @app.route('/files/delete/<filename>')
 def delete_file(filename: str):
-    cc.delete_file(filename)
+    cs.delete_file(filename)
     filenames.remove(filename)
     # Doesn't really matter if we didn't delete something that didn't exist
     return jsonify({'message': 'Delete occurred'})
