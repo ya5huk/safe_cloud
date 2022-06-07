@@ -57,16 +57,23 @@ class DBCommands:
         self.cur.execute(f'''DELETE FROM users WHERE user_id=:id''', {'id': id})
         self.db_con.commit()
 
-    def get_user_details_by_id(self, id: str):
-        self.cur.execute(f'''SELECT * FROM users WHERE user_id=:id''', {'id': id})
+    def get_user_details_by_value(self, value: str, input_type: str):
+        if input_type not in ['user_id', 'username', 'email']:
+            # You can find user only with those value types
+            return None
+        
+        # command based on given type
+        fetch_command = f'''SELECT * FROM users WHERE {input_type}=:{input_type}'''
+        self.cur.execute(fetch_command, {input_type: value})
         ans = self.cur.fetchall()
         if len(ans) == 0:
             return None
 
         user = ans[0] # Should be only one user
         userid, username, email, creation_date, files = user # Splitting the tuple
-        return DBUser(id, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
+        return DBUser(userid, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
+
     def check_email_existance(self, email: str):
         self.cur.execute(f'''SELECT * FROM users WHERE email=:email''', {'email': email})
         ans = self.cur.fetchall()
@@ -83,7 +90,7 @@ class DBCommands:
         
 
 if __name__ == "__main__":
-    db = DBCommands('./user.db')
+    db = DBCommands('./database.db')
     db.create_tables()
-    print(db.check_email_existance('adsm@sad.c'))
+    print(db.get_user_details_by_value('838193d357558069ea86dd58135001517cd0c462d6b32bb830f96d06a980fa83', 'user_id'))
     
