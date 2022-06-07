@@ -1,6 +1,7 @@
+from datetime import datetime
 from flask import Flask, jsonify, redirect, url_for, render_template, request as rq
 from CloudServer import CloudServer
-import hashlib 
+import CloudEncrypt 
 import re, os
 
 DB_FILENAME = os.path.abspath('./database.db')
@@ -24,14 +25,17 @@ def register():
         email = rq.form['email']
         username = rq.form['username']
         password = rq.form['password']
-        user_id = hashify_user(email, username, password)
+
+        # The weird microsec cutting causes problems in login so I cut it
+        creation_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        user_id = CloudEncrypt.hashify_user(email, password, datetime.strptime(creation_time, "%d/%m/%Y, %H:%M:%S"))
         
+        print(creation_time)
         ans = cs.try_register(user_id, username, email)
         if ans['code'] == 'success':
             # Create a database
             return redirect(url_for('login'))
-        else:
-            
+        else: 
             return render_template('register.html', err_msg=ans['msg'])
 
     return render_template('register.html')
@@ -41,6 +45,11 @@ def login():
     if rq.method == 'POST':
         usr_input = rq.form['user_input']
         usr_pass = rq.form['password']
+        ans = cs.try_login(usr_input, usr_pass)
+        if ans['code'] == 'error':
+            return render_template('login.html', err_msg=ans['msg'])
+        else:
+            return redirect(url_for('files'))
     
     return render_template('login.html')
     
@@ -95,7 +104,6 @@ def delete_file(filename: str):
     return jsonify({'message': 'Delete occurred'})
 
 # TODO
-# 1. Finish register and if success (no same emails!) redirect to login
 # 2. In login, create sessions on successful login (permentant for 1 day)
 #   a. Research about seesion secret key (should it be user id ?)
 #   b. now add two-step auth with email
@@ -105,12 +113,8 @@ def delete_file(filename: str):
 # 4. Add a profile page with all the needed details and LOG OUT button (important!)
 # 5. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
 
-def hashify_user(email: str, username: str, password: str):
-    # Using email because it is unique and password/username
-    # for more unbreakable id
-    mixed_str = username[::-2] + password[::-1] + email*5
-    user_id = hashlib.sha256(mixed_str.encode()).hexdigest()
-    return user_id
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

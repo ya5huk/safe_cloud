@@ -5,7 +5,7 @@ from DBObjects import DBFile, DBUser
 import uuid
 import base64
 from IconGrabber import IconGrabber
-
+from CloudEncrypt import hashify_user
 class Codes:
     ADD_FILE = '101'
     GET_FILE_CONTENT = '102'
@@ -56,13 +56,33 @@ class CloudServer:
     def try_register(self, user_id: str, username: str, email: str):
         if self.db.check_email_existance(email): 
             print(email, 'already exists!')
-            return {'code': 'fail', 'msg': f'{email} already exists!'}
+            return {'code': 'errpr', 'msg': f'{email} already exists!'}
         
         usr = DBUser(user_id, username, email, datetime.now(), [])
         self.db.add_user(usr)
 
         return {'code': 'success', 'msg': ''}
 
+    def try_login(self, usr_input: str, usr_pass: str):
+        # User input may be email or username so we must check for both cases
+        input_type = 'email'
+        if not self.db.check_email_existance(usr_input): # email not exists
+            input_type = 'username'
+        db_usr = self.db.get_user_details_by_value(usr_input, input_type)
+        if db_usr == None:
+            # Account does not exist
+            return {'code': 'error', 'msg': 'User does not exist.'}
+
+        print(db_usr.user_id)
+        print(hashify_user(db_usr.email, usr_pass, db_usr.creation_date))
+        # if input is email we hash with that, otherwise we use db email  
+        print(db_usr.creation_date)
+        if db_usr.user_id == \
+            hashify_user(db_usr.email, usr_pass, db_usr.creation_date):
+            
+            return {'code': 'success', 'msg': ''}
+        
+        return {'code': 'error', 'msg': 'One of the credentials is incorrect.'}
 
 if __name__ == '__main__':
     cs = CloudServer('127.0.0.1', 8081)

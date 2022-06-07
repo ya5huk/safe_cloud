@@ -5,35 +5,45 @@
     box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
   }
 </style>
-<form
-  class="container d-flex flex-column align-items-center gap-3"
-  action="#"
-  method="POST"
->
-  <div class="row w-50 form-group gap-2">
-    <label for="inputUser">Username or Email address</label>
-    <input
-      type="text"
-      name="user_input"
-      class="form-control bg-transparent text-white"
-      id="inputUser"
-      placeholder="Either ur name or @ smthin'"
-    />
-  </div>
-  <div class="row w-50 form-group gap-2">
-    <label for="exampleInputPassword1">Password</label>
-    <input
-      name="password"
-      type="password"
-      class="form-control bg-transparent text-white"
-      id="exampleInputPassword1"
-      placeholder="I'm blind"
-    />
-  </div>
-  <div class="row w-10 form-group">
-    <button type="submit" value="submit" class="btn text-white border-danger">
-      Submit
-    </button>
-  </div>
-</form>
+<div class="d-flex justify-content-center">
+  <form
+    class="d-flex flex-column align-items-center lead gap-3"
+    style="width: 30%"
+    action="#"
+    method="post"
+  >
+    <div class="row w-100 form-group gap-2">
+      <label for="inputUser">Username or Email address</label>
+      <input
+        type="text"
+        name="user_input"
+        class="form-control bg-transparent text-white"
+        id="inputUser"
+        placeholder="Either ur name or @ smthin'"
+      />
+    </div>
+    <div class="row w-100 form-group gap-2">
+      <label for="exampleInputPassword1">Password</label>
+      <input
+        name="password"
+        type="password"
+        class="form-control bg-transparent text-white"
+        id="exampleInputPassword1"
+        placeholder="I'm blind"
+      />
+    </div>
+    <div
+      class="w-100 d-flex justify-content-between align-content-center form-group"
+    >
+      <p class="form-text text-danger">{{err_msg}}</p>
+      <button
+        type="submit"
+        value="submit"
+        class="btn btn-sm text-white border-danger"
+      >
+        Submit
+      </button>
+    </div>
+  </form>
+</div>
 {% endblock %}
