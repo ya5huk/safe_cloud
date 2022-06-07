@@ -5,11 +5,16 @@
     box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
   }
 </style>
-<form class="container d-flex flex-column align-items-center gap-3">
+<form
+  class="container d-flex flex-column align-items-center gap-3"
+  action="#"
+  method="post"
+>
   <div class="row w-50 form-group gap-2">
     <label for="InputEmail">Email address</label>
     <input
       type="email"
+      name="email"
       class="form-control bg-transparent text-white"
       id="InputEmail"
       placeholder="That thing with @"
@@ -18,6 +23,7 @@
   <div class="row w-50 form-group gap-2">
     <label for="InputUsername">Username</label>
     <input
+      name="username"
       type="text"
       maxlength="15"
       class="form-control bg-transparent text-white"
@@ -26,11 +32,12 @@
     />
   </div>
   <div class="row w-50 form-group gap-2">
-    <label for="exampleInputPassword1">Password</label>
+    <label for="InputPass">Password</label>
     <input
+      name="password"
       type="password"
       class="form-control bg-transparent text-white"
-      id="exampleInputPassword1"
+      id="InputPass"
       placeholder="Won't see it anyway"
     />
   </div>

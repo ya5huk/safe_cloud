@@ -15,13 +15,25 @@ filenames = [] # All the user's filenames (should be fetched on load and updated
 def home():
     return render_template('index.html')
 
-@app.route('/register')
+@app.route('/register', methods=['POST', 'GET'])
 def register():
+    if rq.method == 'POST':
+        email = rq.form['email']
+        username = rq.form['username']
+        password = rq.form['password']
+        print(email, username, password)
+
+
     return render_template('register.html')
 
-@app.route('/login')
+@app.route('/login', methods=['POST', 'GET'])
 def login():
+    if rq.method == 'POST':
+        usr_input = rq.form['user_input']
+        usr_pass = rq.form['password']
+    
     return render_template('login.html')
+    
 
 @app.route('/files', methods=['POST', 'GET'])
 def files():
@@ -73,6 +85,16 @@ def delete_file(filename: str):
     # Doesn't really matter if we didn't delete something that didn't exist
     return jsonify({'message': 'Delete occurred'})
 
+# TODO
+# 1. Finish register and if success (no same emails!) redirect to login
+# 2. In login, create sessions on successful login (permentant for 1 day)
+#   a. Research about seesion secret key (should it be user id ?)
+#   b. now add two-step auth with email
+# 3. Connect now session to files tab so it will fetch all user files
+# This is not only fetching but adding files / removing files
+# must affect user's files list 
+# 4. Add a profile page with all the needed details and LOG OUT button (important!)
+# 5. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
 
 if __name__ == '__main__':
     app.run(debug=True)
