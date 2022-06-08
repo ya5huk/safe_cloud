@@ -46,8 +46,8 @@ class DBCommands:
         name = ans[0][0] # If more than a file popps up, that is a problem
         return name # Bytes of the file
 
-    def get_file_content(self, filename: str):
-        self.cur.execute(f'''SELECT content FROM files WHERE name=:filename''', {'filename': filename})
+    def get_file_content(self, file_id: str):
+        self.cur.execute(f'''SELECT content FROM files WHERE file_id=:file_id''', {'file_id': file_id})
         ans = self.cur.fetchall()
         if len(ans) == 0:
             return None

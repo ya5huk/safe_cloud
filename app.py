@@ -99,12 +99,22 @@ def files():
 
 @app.route('/files/download/<filename>')
 def download_file(filename: str):
-    content = cs.return_file_content(filename)
-    return content
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    # Search for filename among only the logged account
+    files_id = cs.get_user_file_ids(session['user_id'])
+    for fid in files_id:
+        
+        if cs.get_filename(fid) == filename:
+            # Found relevant file, so I can download it 
+            content = cs.return_file_content(fid)
+            return content
+    return redirect(url_for('login')) # If file wasn't found
 
 @app.route('/files/delete/<filename>')
 def delete_file(filename: str):
-    
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     # Search for filename among only the logged account
     files_id = cs.get_user_file_ids(session['user_id'])
     for fid in files_id:
@@ -115,9 +125,10 @@ def delete_file(filename: str):
             cs.remove_file_from_user(session['user_id'], fid) # user
             session['filenames'].remove(filename) # session
 
-    # Doesn't really matter if we didn't delete something that didn't exist
-    return jsonify({'message': 'Delete occurred'})
+            # Doesn't really matter if we didn't delete something that didn't exist
+            return jsonify({'message': 'Delete occurred'})
 
+    return redirect(url_for('login')) # No file found
 @app.route('/logout')
 def logout():
     if 'user_id' in session:
@@ -126,14 +137,10 @@ def logout():
     return redirect(url_for('login'))
 
 # TODO
-# 2. In login, create sessions on successful login (permentant for 1 day)
-#   a. Research about session secret key (should it be user id ?)
-#   b. now add two-step auth with email
-# 3. Connect now session to files tab so it will fetch all user files
-# This is not only fetching but adding files / removing files
-# must affect user's files list 
-# 4. Add a profile page with all the needed details and LOG OUT button (important!)
-# 5. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
+# 3. Add a profile page with all the needed details and LOG OUT button (important!)
+# 4. Two-step auth
+# 5. Navigation buttons everywhere (so I can move from login to register f.e)
+# 6. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
 
 def configure_filename(filename: str, curr_filenames: list[str]):
     saved_filename = filename
