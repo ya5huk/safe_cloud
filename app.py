@@ -107,7 +107,7 @@ def download_file(filename: str):
         
         if cs.get_filename(fid) == filename:
             # Found relevant file, so I can download it 
-            content = cs.return_file_content(fid)
+            content = cs.return_file_content_by_id(fid)
             return content
     return redirect(url_for('login')) # If file wasn't found
 
@@ -140,7 +140,7 @@ def logout():
 # 3. Add a profile page with all the needed details and LOG OUT button (important!)
 # 4. Two-step auth
 # 5. Navigation buttons everywhere (so I can move from login to register f.e)
-# 6. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
+# 6. Features: security - encrypt files and decrypt with user-id , zip automatically files, trash section 
 
 def configure_filename(filename: str, curr_filenames: list[str]):
     saved_filename = filename

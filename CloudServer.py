@@ -44,8 +44,8 @@ class CloudServer:
         return base64.b64encode(icon_content)
 
     # Function returns file base64 content based on filename 
-    def return_file_content(self, filename: str):
-        content = self.db.get_file_content(filename)
+    def return_file_content_by_id(self, file_id: str):
+        content = self.db.get_file_content(file_id)
         if content == None:
             print("Didn't receive anything from file, should get an error")
 
