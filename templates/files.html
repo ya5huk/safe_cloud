@@ -40,6 +40,7 @@ content %}
   </section>
 </div>
 <ul class="d-flex flex-wrap gap-5" id="files-list">
+  <!-- Example li -->
   <li style="width: 70px" id="filetemplate" hidden>
     <div class="d-flex align-items-center card bg-transparent border-0">
       <img id="filetemplate-img" class="card-img-top" src="static/_blank.png" />
@@ -74,6 +75,42 @@ content %}
       </div>
     </div>
   </li>
+  {% for fd in files_data %}
+  <li style="width: 70px" id="filetemplate">
+    <div class="d-flex align-items-center card bg-transparent border-0">
+      <img id="filetemplate-img" class="card-img-top" src={{fd["icon_data"]}} />
+      <div class="card-body p-0 pt-1">
+        <p
+          class="card-text text-white lead overflow-auto"
+          style="font-size: 15px"
+          id="filetemplateText"
+        >
+          {{fd["name"]}}
+        </p>
+      </div>
+      <div
+        class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0"
+      >
+        <button
+          class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
+          style="width: 40%"
+          id="delete-button-template"
+          onclick="deleteFile(this.id)"
+        >
+          <img src="static/bin.png" width="100%" />
+        </button>
+        <button
+          class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
+          style="width: 40%"
+          id="download-button-template"
+          onclick="downloadFile(this.id)"
+        >
+          <img src="static/download_icon.png" width="100%" />
+        </button>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
 </ul>
 <script>
   // thanks to https://www.youtube.com/watch?v=9Xh_ZpFkROI

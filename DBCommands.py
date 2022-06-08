@@ -33,6 +33,15 @@ class DBCommands:
         self.cur.execute(f'''DELETE FROM files WHERE name=:filename''', {'filename': filename})
         self.db_con.commit()
     
+    def get_file_name(self, file_id: str):
+        self.cur.execute(f'''SELECT name FROM files WHERE file_id=:file_id''', {'file_id': file_id})
+        ans = self.cur.fetchall()
+        if len(ans) == 0:
+            return None
+        
+        name = ans[0][0] # If more than a file popps up, that is a problem
+        return name # Bytes of the file
+
     def get_file_content(self, filename: str):
         self.cur.execute(f'''SELECT content FROM files WHERE name=:filename''', {'filename': filename})
         ans = self.cur.fetchall()
@@ -81,6 +90,16 @@ class DBCommands:
             return False
         return True
     
+    def get_user_files(self, user_id: str):
+        self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
+        ans = self.cur.fetchall()
+        if len(ans) == 0: # empty list = no accounts
+            return None
+        
+        if ans[0][0] == '':
+            return []
+        else:
+            return ans[0][0].split(',')
 
     def close(self):
         self.cur.close()

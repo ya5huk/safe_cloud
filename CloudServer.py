@@ -32,14 +32,16 @@ class CloudServer:
 
         # After file is added, send back the icon to the client
         # so website will show file's added icon
+        self.get_file_icon_content(filename)
         
+    def get_file_icon_content(self, filename: str):
         icon_filepath = self.icon_grabber.grab_filepath(filename)
 
         with open(icon_filepath, 'rb') as f:
             icon_content = f.read()
         
         return base64.b64encode(icon_content)
-        
+
     # Function returns file base64 content based on filename 
     def return_file_content(self, filename: str):
         content = self.db.get_file_content(filename)
@@ -73,16 +75,21 @@ class CloudServer:
             # Account does not exist
             return {'code': 'error', 'msg': 'User does not exist.'}
 
-        print(db_usr.user_id)
-        print(hashify_user(db_usr.email, usr_pass, db_usr.creation_date))
         # if input is email we hash with that, otherwise we use db email  
-        print(db_usr.creation_date)
         if db_usr.user_id == \
             hashify_user(db_usr.email, usr_pass, db_usr.creation_date):
             
-            return {'code': 'success', 'msg': ''}
+            return {'code': 'success', 'msg': db_usr.user_id}
         
         return {'code': 'error', 'msg': 'One of the credentials is incorrect.'}
+
+    def get_user_filenames(self, user_id: str):
+        filenames = []
+        files_id = self.db.get_user_files(user_id)
+        for fd in files_id:
+            filename = self.db.get_file_name(fd)
+            filenames.append(filename)
+        return filenames
 
 if __name__ == '__main__':
     cs = CloudServer('127.0.0.1', 8081)
