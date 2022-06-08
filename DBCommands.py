@@ -29,8 +29,12 @@ class DBCommands:
         (file.file_id, '1' if file.in_dir else '0', file.name, file.content, str(file.added_date.strftime("%d/%m/%Y, %H:%M:%S"))))
         self.db_con.commit()
 
-    def remove_file(self, filename: str):
+    def remove_file_by_name(self, filename: str):
         self.cur.execute(f'''DELETE FROM files WHERE name=:filename''', {'filename': filename})
+        self.db_con.commit()
+
+    def remove_file_by_id(self, file_id: str):
+        self.cur.execute(f'''DELETE FROM files WHERE file_id=:file_id''', {'file_id': file_id})
         self.db_con.commit()
     
     def get_file_name(self, file_id: str):
@@ -90,7 +94,7 @@ class DBCommands:
             return False
         return True
     
-    def get_user_files(self, user_id: str):
+    def get_user_files(self, user_id: str): # file_ids
         self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
         ans = self.cur.fetchall()
         if len(ans) == 0: # empty list = no accounts
@@ -100,6 +104,28 @@ class DBCommands:
             return []
         else:
             return ans[0][0].split(',')
+        
+    def change_user_file_ids(self, user_id: str, file_id: str, change_type: str):
+        if change_type not in ['remove', 'add']:
+            return None
+
+        self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
+        ans = self.cur.fetchall()            
+        
+        if ans[0][0] == '':
+            self.cur.execute(f'''UPDATE users SET files=:file_id''', {'file_id': file_id})
+            
+        else:
+            files = ans[0][0].split(',')
+            if change_type == 'add':
+                files.append(file_id)
+            else:
+                files.remove(file_id)
+            new_files = ','.join(files)
+            self.cur.execute(f'''UPDATE users SET files=:new_files WHERE user_id=:user_id''',
+            {'new_files': new_files, 'user_id': user_id})
+
+        self.db_con.commit()   
 
     def close(self):
         self.cur.close()
@@ -111,5 +137,5 @@ class DBCommands:
 if __name__ == "__main__":
     db = DBCommands('./database.db')
     db.create_tables()
-    print(db.get_user_details_by_value('838193d357558069ea86dd58135001517cd0c462d6b32bb830f96d06a980fa83', 'user_id'))
+    print(db.add_to_user_file_id('70ce4973ae126f7da5f659e549b3bf10', 'aa'))
     

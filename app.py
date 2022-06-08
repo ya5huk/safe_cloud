@@ -15,11 +15,6 @@ app.config.from_pyfile('config.py', silent=True) # Overrides if config.py exists
 app.permanent_session_lifetime = timedelta(days=1)
 
 cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
-filenames = [] # All the user's filenames (should be fetched on load and updated)
-
-# @app.route('/')
-# def home():
-#     return render_template('index.html')
 
 @app.route('/')
 def home():
@@ -59,6 +54,7 @@ def login():
             # success
             session.permanent = True
             session['user_id'] = ans['msg'] 
+            session['filenames'] = []
             return redirect(url_for('files'))
     
     return render_template('login.html')
@@ -74,9 +70,11 @@ def files():
         user_id = session['user_id']
         filenames = cs.get_user_filenames(user_id)
         
+        session['filenames'] = filenames
+        
         files_data = []
-
         for fn in filenames:
+            
             icon_content = b'data:image/png;base64,' + cs.get_file_icon_content(fn)
             files_data.append(
                 {'name': fn,
@@ -88,32 +86,14 @@ def files():
         file = rq.files['file']
         content = file.stream.read()  # Send stream over a socket
 
-        return 'hello'
-        # Code to manage duplicated files 
+        # Manage duplicates
+        saved_filename = configure_filename(file.filename, session['filenames'])
+        file_id, file_icon_data = cs.add_file(False, saved_filename, content)
+        
+        # Update user's files
+        cs.add_file_to_user(session['user_id'], file_id)
 
-        # # Splitting filename.ext to filename, ext
-        # saved_filename = file.filename
-        # actual_name = '.'.join(saved_filename.split('.')[:-1])
-        # ext = saved_filename.split('.')[-1]
-        
-        # # Adding (duplicated file number) if needed
-        # if saved_filename not in filenames:
-        #     filenames.append(file.filename)
-        # else:
-        #     # turn name.ext -> name (counter).ext
-        #     occurrences = 0
-        #     for filename in filenames:
-        #         # we want to count 'filename' and 'filename (1)' for example
-        #         # so filenames.count is not enough (we won't count the duplicated ones) 
-        #         # regex finds files with struct -> filename (num).ext
-        #         if re.match(f'{actual_name}.* \(\d*\).{ext}', filename) != None or filename == file.filename:
-        #             occurrences += 1
-            
-        saved_filename = f'{actual_name} ({occurrences}).{ext}'
-        filenames.append(saved_filename)
-        
-        file_icon_data = cs.add_file(False, saved_filename, content)
-        
+
         return jsonify({'data': file_icon_data.decode(), 'filename': saved_filename})
 
 
@@ -124,8 +104,17 @@ def download_file(filename: str):
 
 @app.route('/files/delete/<filename>')
 def delete_file(filename: str):
-    cs.delete_file(filename)
-    filenames.remove(filename)
+    
+    # Search for filename among only the logged account
+    files_id = cs.get_user_file_ids(session['user_id'])
+    for fid in files_id:
+        
+        if cs.get_filename(fid) == filename:
+            
+            cs.delete_file_by_value(fid, 'file_id') # files
+            cs.remove_file_from_user(session['user_id'], fid) # user
+            session['filenames'].remove(filename) # session
+
     # Doesn't really matter if we didn't delete something that didn't exist
     return jsonify({'message': 'Delete occurred'})
 
@@ -133,6 +122,7 @@ def delete_file(filename: str):
 def logout():
     if 'user_id' in session:
         session.pop('user_id', None)
+        session.pop('filenames', None)
     return redirect(url_for('login'))
 
 # TODO
@@ -145,7 +135,29 @@ def logout():
 # 4. Add a profile page with all the needed details and LOG OUT button (important!)
 # 5. Features: security - encrypt files and maybe decrypt with user-id, zip automatically files, trash section 
 
+def configure_filename(filename: str, curr_filenames: list[str]):
+    saved_filename = filename
+    actual_name = '.'.join(saved_filename.split('.')[:-1])
+    ext = saved_filename.split('.')[-1]
+    
+    # Adding (duplicated file number) if needed
+    if saved_filename not in curr_filenames:
+        curr_filenames.append(filename)
+    else:
+        # turn name.ext -> name (counter).ext
+        occurrences = 0
+        for fn in curr_filenames:
+            # we want to count 'filename' and 'filename (1)' for example
+            # so filenames.count is not enough (we won't count the duplicated ones) 
+            # regex finds files with struct -> filename (num).ext
+            if re.match(f'{actual_name}.* \(\d*\).{ext}', filename) != None or fn == filename:
+                occurrences += 1
+        
+        saved_filename = f'{actual_name} ({occurrences}).{ext}'
 
+        curr_filenames.append(saved_filename)
+
+    return saved_filename
     
 
 if __name__ == '__main__':

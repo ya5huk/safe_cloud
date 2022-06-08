@@ -32,7 +32,8 @@ class CloudServer:
 
         # After file is added, send back the icon to the client
         # so website will show file's added icon
-        self.get_file_icon_content(filename)
+        
+        return file_id, self.get_file_icon_content(filename)
         
     def get_file_icon_content(self, filename: str):
         icon_filepath = self.icon_grabber.grab_filepath(filename)
@@ -51,8 +52,11 @@ class CloudServer:
         return base64.b64encode(content)
 
     # Function deletes file with a give filename
-    def delete_file(self, filename: str):
-        self.db.remove_file(filename)
+    def delete_file_by_value(self, value: str, value_type: str):
+        if value_type == 'file_id':
+            self.db.remove_file_by_id(value)
+        if value_type == 'filename':
+            self.db.remove_file_by_name(value) 
 
     # Function tries to register a user and returns a msg accordingly
     def try_register(self, user_id: str, username: str, email: str):
@@ -83,13 +87,27 @@ class CloudServer:
         
         return {'code': 'error', 'msg': 'One of the credentials is incorrect.'}
 
+    def get_user_file_ids(self, user_id: str):
+        return self.db.get_user_files(user_id)
+
     def get_user_filenames(self, user_id: str):
         filenames = []
         files_id = self.db.get_user_files(user_id)
         for fd in files_id:
             filename = self.db.get_file_name(fd)
-            filenames.append(filename)
+            if filename != None:
+                filenames.append(filename)
+            
         return filenames
+    
+    def add_file_to_user(self, user_id: str, file_id: str):
+        self.db.change_user_file_ids(user_id, file_id, 'add')
+    
+    def remove_file_from_user(self, user_id: str, file_id: str):
+        self.db.change_user_file_ids(user_id, file_id, 'remove')
+
+    def get_filename(self, file_id: str):
+        return self.db.get_file_name(file_id)
 
 if __name__ == '__main__':
     cs = CloudServer('127.0.0.1', 8081)
