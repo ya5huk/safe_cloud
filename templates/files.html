@@ -76,14 +76,15 @@ content %}
     </div>
   </li>
   {% for fd in files_data %}
-  <li style="width: 70px" id="filetemplate">
+  <!-- ID'S FOR OBJECTS ARE VERY IMPORTANT -->
+  <li style="width: 70px" id="{{fd["name"]}}-list-item">
     <div class="d-flex align-items-center card bg-transparent border-0">
-      <img id="filetemplate-img" class="card-img-top" src={{fd["icon_data"]}} />
+      <img id="{{fd["name"]}}-file-icon" class="card-img-top" src={{fd["icon_data"]}} />
       <div class="card-body p-0 pt-1">
         <p
           class="card-text text-white lead overflow-auto"
           style="font-size: 15px"
-          id="filetemplateText"
+          id="{{fd["name"]}}-file-body"
         >
           {{fd["name"]}}
         </p>
@@ -94,7 +95,7 @@ content %}
         <button
           class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
           style="width: 40%"
-          id="delete-button-template"
+          id="{{fd["name"]}}-delete-button"
           onclick="deleteFile(this.id)"
         >
           <img src="static/bin.png" width="100%" />
@@ -102,7 +103,7 @@ content %}
         <button
           class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
           style="width: 40%"
-          id="download-button-template"
+          id="{{fd["name"]}}-download-button"
           onclick="downloadFile(this.id)"
         >
           <img src="static/download_icon.png" width="100%" />
@@ -254,6 +255,7 @@ content %}
   };
 
   const deleteFile = (id) => {
+    console.log(id);
     filename = id.slice(0, id.length - "-delete-button".length);
     $.ajax({
       url: `/files/delete/${filename}`,
