@@ -1,0 +1,21 @@
+{% extends "authbase.html" %} {% block content %}
+<div class="d-flex justify-content-center">
+  <form
+    class="d-flex flex-column align-items-center lead gap-3"
+    style="width: 30%"
+    action="#"
+    method="post"
+  >
+    <div class="row w-100 form-group gap-2">
+      <label for="inputCode">Enter code sent to email</label>
+      <input
+        type="text"
+        name="code_input"
+        class="form-control bg-transparent text-white"
+        id="inputCode"
+        placeholder="codeeee"
+      />
+    </div>
+  </form>
+</div>
+{% endblock %}

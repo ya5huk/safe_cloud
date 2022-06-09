@@ -1,11 +1,14 @@
+from contextlib import redirect_stderr
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, session, redirect, url_for, render_template, request as rq
 from CloudServer import CloudServer
+from TwoStepAuth import TwoStepAuth
 import CloudEncrypt 
 import re, os
 
 DB_FILENAME = os.path.abspath('./database.db')
 EXTENSION_ICONS_PATH = os.path.abspath('./images/extension_icons') + '/'
+tsa = TwoStepAuth('ilan147963@gmail.com')
 
 app = Flask(__name__)
 # Secret key
@@ -42,6 +45,23 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/two-step-auth', methods=['POST', 'GET'])
+def two_step_auth():
+    if 'email' not in session or 'next_station' not in session:
+            return redirect(url_for('login'))
+        
+    email = session['email']
+    redirect_to = session['next_station']    
+    code = tsa.generate_code(6)
+    
+    if not tsa.check_if_email_exists(email):
+        session['err_msg'] = 'Email does not exist!'
+        return redirect(url_for('login'))
+    
+    tsa.send_code(code, email)
+
+    return render_template('code_enter.html')
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if rq.method == 'POST':
@@ -51,12 +71,19 @@ def login():
         if ans['code'] == 'error':
             return render_template('login.html', err_msg=ans['msg'])
         else:
+            user = cs.get_user_details(ans['msg'])
+            session['email'] = user.email  # Where to send
+            session['next_station'] = 'files'  # Where to redirect
+            return redirect(url_for('two_step_auth'))
             # success
             session.permanent = True
             session['user_id'] = ans['msg'] 
             session['filenames'] = []
             return redirect(url_for('files'))
     
+    err_msg = session.pop('err_msg', None)
+    if err_msg:
+        return render_template('login.html', err_msg=err_msg)
     return render_template('login.html')
     
 

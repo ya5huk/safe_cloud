@@ -60,6 +60,11 @@ class CloudServer:
 
     # Function tries to register a user and returns a msg accordingly
     def try_register(self, user_id: str, username: str, email: str):
+        
+        # Must check for username & email uniqueness because
+        # two users with same pass & username may sign in to different accounts
+        # because enetering a username will fetch their email for unique code 
+        # and db won't know what email to fetch
         if self.db.check_email_existance(email): 
             print(email, 'already exists!')
             return {'code': 'errpr', 'msg': f'{email} already exists!'}
