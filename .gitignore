@@ -1,4 +1,8 @@
+# Own addition
 private/
+
+# Shouldn't be open to public
+flask_session/ 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
