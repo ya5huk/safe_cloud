@@ -44,12 +44,26 @@
       />
     </div>
     <div
-      class="d-flex w-100 align-items-center justify-content-between form-group"
+      class="w-100 d-flex justify-content-between align-content-center form-group"
     >
-      <p class="form-text text-danger">{{err_msg}}</p>
-      <button type="submit" class="btn btn-sm text-white fs-6 border-danger">
-        Submit
-      </button>
+      <div class="d-flex flex-column w-100">
+        {% if err_msg %}
+        <p class="form-text text-danger fs-6">{{err_msg}}</p>
+        {% endif %}
+        <div class="d-flex justify-content-between align-content-center">
+          <p class="text-white lead fs-6">
+            Have an account?
+            <a class="text-white" href="/login">Login</a>
+          </p>
+          <button
+            type="submit"
+            value="submit"
+            class="lead btn-custom text-white border rounded fs-6 bg-transparent border-danger"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 </div>

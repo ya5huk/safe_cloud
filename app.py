@@ -239,10 +239,6 @@ def logout():
         session.pop('filenames', None)
     return redirect(url_for('login'))
 
-# TODO
-# 4. Two-step auth
-# 5. Navigation buttons everywhere (so I can move from login to register f.e)
-# 6. Features: security - encrypt files and decrypt with user-id , zip automatically files, trash section 
 
 def configure_filename(filename: str, curr_filenames: list[str]):
     saved_filename = filename
@@ -275,8 +271,12 @@ def configure_filename(filename: str, curr_filenames: list[str]):
 def page_not_found(e):
     return render_template('404.html', err_msg=e)
 
-
 app.register_error_handler(404, page_not_found)
+
+# TODO
+# 5. Navigation buttons everywhere (so I can move from login to register f.e)
+# 6. Features: security - encrypt files and decrypt with user-id , zip automatically files, trash section 
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -35,14 +35,24 @@
     <div
       class="w-100 d-flex justify-content-between align-content-center form-group"
     >
-      <p class="form-text text-danger">{{err_msg}}</p>
-      <button
-        type="submit"
-        value="submit"
-        class="btn btn-sm text-white border-danger"
-      >
-        Submit
-      </button>
+      <div class="d-flex flex-column w-100">
+        {% if err_msg %}
+        <p class="form-text text-danger fs-6">{{err_msg}}</p>
+        {% endif %}
+        <div class="d-flex justify-content-between align-content-center">
+          <p class="text-white lead fs-6">
+            New to the game?
+            <a class="text-white" href="/register">Register</a>
+          </p>
+          <button
+            type="submit"
+            value="submit"
+            class="lead btn-custom text-white border rounded fs-6 bg-transparent border-danger"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 </div>
