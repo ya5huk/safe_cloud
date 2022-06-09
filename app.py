@@ -21,6 +21,7 @@ Session(app)
 app.secret_key = 'dev' # Const in development
 app.config.from_pyfile('config.py', silent=True) # Overrides if config.py exists
 
+
 app.permanent_session_lifetime = timedelta(days=1)
 
 cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
@@ -267,6 +268,15 @@ def configure_filename(filename: str, curr_filenames: list[str]):
 
     return saved_filename
     
+
+# error pages ---------------
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html', err_msg=e)
+
+
+app.register_error_handler(404, page_not_found)
 
 if __name__ == '__main__':
     app.run(debug=True)
