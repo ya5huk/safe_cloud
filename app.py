@@ -129,6 +129,22 @@ def delete_file(filename: str):
             return jsonify({'message': 'Delete occurred'})
 
     return redirect(url_for('login')) # No file found
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = cs.get_user_details(session['user_id'])
+    if user:
+        # Send in it parts because I don't want all the details
+        # out there, sounds risky
+        return render_template('profile.html',
+        username=user.username,
+        email=user.email,
+        creation_date = user.creation_date.strftime("%d %B, %Y"),
+        )
+    return 'error'
+
 @app.route('/logout')
 def logout():
     if 'user_id' in session:

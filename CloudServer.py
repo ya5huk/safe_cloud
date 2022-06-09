@@ -109,6 +109,10 @@ class CloudServer:
     def get_filename(self, file_id: str):
         return self.db.get_file_name(file_id)
 
+    def get_user_details(self, user_id: str):
+        user = self.db.get_user_details_by_value(user_id, 'user_id')
+        return user
+
 if __name__ == '__main__':
     cs = CloudServer('127.0.0.1', 8081)
 

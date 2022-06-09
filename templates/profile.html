@@ -1,0 +1,21 @@
+{% extends "general.html" %} {% block title %} Profile {% endblock %} {% block
+content %}
+<style>
+  .btn-hover-special {
+    border-color: darkred;
+  }
+  .btn-hover-special:hover {
+    background-color: darkred;
+    border-color: transparent;
+  }
+</style>
+<div class="d-flex justify-content-between pt-5 ps-5">
+  <div class="d-flex flex-column gap-2">
+    <h1 class="display-3 text-white">{{username}}</h1>
+    <p class="lead fs-3 text-white">{{email}}</p>
+    <a class="btn btn-hover-special text-white lead" href="/logout">Logout</a>
+  </div>
+  <p class="lead fs-3 text-white pe-5">{{creation_date}}</p>
+</div>
+
+{% endblock %}
