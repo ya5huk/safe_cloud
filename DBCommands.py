@@ -94,6 +94,13 @@ class DBCommands:
             return False
         return True
     
+    def check_username_existance(self, username: str):
+        self.cur.execute(f'''SELECT * FROM users WHERE username=:username''', {'username': username})
+        ans = self.cur.fetchall()
+        if len(ans) == 0: # empty list = no accounts
+            return False
+        return True
+    
     def get_user_files(self, user_id: str): # file_ids
         self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
         ans = self.cur.fetchall()
@@ -127,7 +134,8 @@ class DBCommands:
 
         self.db_con.commit()   
 
-    def close(self):
+    # Runs on deconstruction of object
+    def __del__(self):
         self.cur.close()
 
     def __repr__(self) -> str:
@@ -137,5 +145,5 @@ class DBCommands:
 if __name__ == "__main__":
     db = DBCommands('./database.db')
     db.create_tables()
-    print(db.add_to_user_file_id('70ce4973ae126f7da5f659e549b3bf10', 'aa'))
+    print(db.check_username_existance('r'))
     

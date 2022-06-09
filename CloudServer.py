@@ -64,6 +64,10 @@ class CloudServer:
             print(email, 'already exists!')
             return {'code': 'errpr', 'msg': f'{email} already exists!'}
         
+        if self.db.check_username_existance(username):
+            print(username, 'already exists!')
+            return {'code': 'errpr', 'msg': f'{username} ia already taken.'}
+        
         usr = DBUser(user_id, username, email, datetime.now(), [])
         self.db.add_user(usr)
 
