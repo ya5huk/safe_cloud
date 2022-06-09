@@ -1,6 +1,6 @@
-from contextlib import redirect_stderr
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, session, redirect, url_for, render_template, request as rq
+from flask_session import Session # Server-side session
 from CloudServer import CloudServer
 from TwoStepAuth import TwoStepAuth
 import CloudEncrypt 
@@ -13,13 +13,25 @@ auth_codes = [] # list of {email: code, email: code} used for 2step auth
 # just to prevent it from be shared in session
 
 app = Flask(__name__)
-# Secret key
+
+app.config['SESSION_TYPE'] = 'filesystem' # For server-side sessions 
+Session(app)
+
+# Secret key, session encrypting
 app.secret_key = 'dev' # Const in development
 app.config.from_pyfile('config.py', silent=True) # Overrides if config.py exists
 
 app.permanent_session_lifetime = timedelta(days=1)
 
 cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
+
+# NOTE Sessions are server-side
+# - sensative info can pass in
+# - I tried to minimize it 
+#   -> The only place where I send sensative info is in register
+#   -> where it is not very important to hide from the client the info
+#      he already entered...
+
 
 @app.route('/')
 def home():
@@ -29,41 +41,66 @@ def home():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    if rq.method == 'POST':
+    # The weird microsec cutting causes problems in login so I cut it
+    
+
+    if rq.method == 'POST':      
         email = rq.form['email']
         username = rq.form['username']
         password = rq.form['password']
-
-        # The weird microsec cutting causes problems in login so I cut it
-        creation_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
-        user_id = CloudEncrypt.hashify_user(email, password, datetime.strptime(creation_time, "%d/%m/%Y, %H:%M:%S"))
         
-        ans = cs.try_register(user_id, username, email)
+
+        ans = cs.register_possibility(username, email)
         if ans['code'] == 'success':
-            # Create a database
-            return redirect(url_for('login'))
-        else: 
+            # 2step auth is unique for both login, signup
+            # But session vars preperation is needed
+            session['password'] = password
+            session['username'] = username
+            session['email'] = email
+            session['action'] = 'register'
+            return redirect(url_for('two_step_auth'))
+        else:
             return render_template('register.html', err_msg=ans['msg'])
 
+    err_msg = session.pop('err_msg', None)
+    if err_msg:
+        return render_template('register.html', err_msg=err_msg)
     return render_template('register.html')
 
 @app.route('/two-step-auth', methods=['POST', 'GET'])
 def two_step_auth():
+    redirect_to = 'files' # Where after 2step auth succeeds
+    
     if rq.method == 'POST':
         # If we received a POST req, then we already 
         # did a GET here, and values are popped
         # so this if must be first, to not get redirected
-        recieved_code = rq.form['code_input']
+        received_code = rq.form['code_input']
         email = session.pop('email', None)
-        redirect_to = session.pop('next_station', None)
+        user_action = session.pop('action', None)
         for ac in auth_codes:
-            if ac['email'] == email and ac['code'] == recieved_code:
+            if ac['email'] == email and ac['code'] == received_code:
                 # code that is typed is connected to the email
                 # success
                 auth_codes.remove(ac)
-
                 session.permanent = True
-                session['user_id'] = cs.get_user_details(email, 'email').user_id
+
+                # Only in register -> Create an account
+                
+                if user_action == 'register':
+                    password = session.pop('password')
+                    username = session.pop('username')
+
+                    # Convertion is to delete micro-secs from now(), makes problems...
+                    creation_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+                    creation_time = datetime.strptime(creation_time, "%d/%m/%Y, %H:%M:%S")
+                    user_id = CloudEncrypt.hashify_user(email, password, creation_time)
+                    cs.register(user_id, username, email, creation_time)
+
+                    session['user_id'] = user_id # as a setup to /files
+                else:
+                    session['user_id'] = cs.get_user_details(email, 'email').user_id # as a setup to /files
+                
                 session['filenames'] = []
                 return redirect(url_for(redirect_to))
         
@@ -71,21 +108,19 @@ def two_step_auth():
         return redirect(url_for('login'))
     
 
-    if 'email' not in session or 'next_station' not in session:
+    if 'email' not in session:
             return redirect(url_for('login'))
 
     email = session['email']
-    redirect_to = session['next_station']
-    code = tsa.generate_code(6)
 
-    auth_codes.append({'email': email, 'code': code})
-    
     if not tsa.check_if_email_exists(email):
         session['err_msg'] = 'Email does not exist!'
         session.pop('email', None) # Clear session
-        session.pop('next_station', None)
-        return redirect(url_for(redirect_to))
-    
+        return redirect(rq.referrer)
+
+    code = tsa.generate_code(6)
+    auth_codes.append({'email': email, 'code': code})
+
     tsa.send_code(code, email)
 
     return render_template('code_enter.html')
@@ -103,7 +138,6 @@ def login():
             if not user:
                 return render_template('login.html', err_msg='No such user..')
             session['email'] = user.email  # Where to send
-            session['next_station'] = 'files'  # Where to redirect
             return redirect(url_for('two_step_auth'))
            
     err_msg = session.pop('err_msg', None)
@@ -205,7 +239,6 @@ def logout():
     return redirect(url_for('login'))
 
 # TODO
-# 3. Add a profile page with all the needed details and LOG OUT button (important!)
 # 4. Two-step auth
 # 5. Navigation buttons everywhere (so I can move from login to register f.e)
 # 6. Features: security - encrypt files and decrypt with user-id , zip automatically files, trash section 

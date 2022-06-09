@@ -50,7 +50,7 @@ class TwoStepAuth:
             print(f'Message failed: {e}')
 
     def __del__(self):
-        print('Closing connection')
+        print('Closing smtp connection')
         self.conn.close()
 
     @staticmethod

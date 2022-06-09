@@ -58,25 +58,28 @@ class CloudServer:
         if value_type == 'filename':
             self.db.remove_file_by_name(value) 
 
-    # Function tries to register a user and returns a msg accordingly
-    def try_register(self, user_id: str, username: str, email: str):
-        
+    # Function registers a user and returns a msg accordingly
+    def register(self, user_id: str, username: str, email: str, creation_date: datetime):
+
+        usr = DBUser(user_id, username, email, creation_date, [])
+        self.db.add_user(usr)
+        print(f'Registered {user_id} as {username} ({email})')
+
+    def register_possibility(self, email: str, username: str):
         # Must check for username & email uniqueness because
         # two users with same pass & username may sign in to different accounts
         # because enetering a username will fetch their email for unique code 
         # and db won't know what email to fetch
+
         if self.db.check_email_existance(email): 
             print(email, 'already exists!')
-            return {'code': 'errpr', 'msg': f'{email} already exists!'}
+            return {'code': 'error', 'msg': f'{email} already exists!'}
         
         if self.db.check_username_existance(username):
             print(username, 'already exists!')
-            return {'code': 'errpr', 'msg': f'{username} ia already taken.'}
+            return {'code': 'error', 'msg': f'{username} ia already taken.'}
         
-        usr = DBUser(user_id, username, email, datetime.now(), [])
-        self.db.add_user(usr)
-
-        return {'code': 'success', 'msg': ''}
+        return {'code': 'success', 'msg': ''} 
 
     def try_login(self, usr_input: str, usr_pass: str):
         # User input may be email or username so we must check for both cases

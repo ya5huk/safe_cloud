@@ -136,6 +136,7 @@ class DBCommands:
 
     # Runs on deconstruction of object
     def __del__(self):
+        print('Closing db connection')
         self.cur.close()
 
     def __repr__(self) -> str:
