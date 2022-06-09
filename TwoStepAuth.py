@@ -13,7 +13,7 @@ class TwoStepAuth:
         # Create .env for these
         self.username = config('EMAIL_USERNAME')
         self.password = config('EMAIL_PASSWORD')
-        print(f'Trying to log in with {self.username}, {self.password}...', end='')
+        print(f'Trying to log in with {self.username}, {self.password}... ', end='')
         
         self.conn = SMTP_SSL(self.smtp_server, 465)
         self.conn.set_debuglevel(False)
@@ -33,15 +33,17 @@ class TwoStepAuth:
             
 
     def send_code(self, code: str, dest_email: str):
-        text_subtype = 'plain'
+        # Beautify
+        text_subtype = 'html'
         content = f"""\
-        This message should send {code}
+        <p>Thanks for logging in.</p>
+        <p>Code: <b>{code}</b></p>
         """
         subject = 'SafeCloud code confiramtion'
         try:
             msg = MIMEText(content, text_subtype)
             msg['Subject'] = subject
-            msg['From'] = self.sender_email
+            msg['From'] = 'SafeCloud'
             self.conn.sendmail(self.sender_email, dest_email, msg.as_string())
 
         except Exception as e:

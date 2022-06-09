@@ -9,6 +9,8 @@ import re, os
 DB_FILENAME = os.path.abspath('./database.db')
 EXTENSION_ICONS_PATH = os.path.abspath('./images/extension_icons') + '/'
 tsa = TwoStepAuth('ilan147963@gmail.com')
+auth_codes = [] # list of {email: code, email: code} used for 2step auth
+# just to prevent it from be shared in session
 
 app = Flask(__name__)
 # Secret key
@@ -47,16 +49,42 @@ def register():
 
 @app.route('/two-step-auth', methods=['POST', 'GET'])
 def two_step_auth():
+    if rq.method == 'POST':
+        # If we received a POST req, then we already 
+        # did a GET here, and values are popped
+        # so this if must be first, to not get redirected
+        recieved_code = rq.form['code_input']
+        email = session.pop('email', None)
+        redirect_to = session.pop('next_station', None)
+        for ac in auth_codes:
+            if ac['email'] == email and ac['code'] == recieved_code:
+                # code that is typed is connected to the email
+                # success
+                auth_codes.remove(ac)
+
+                session.permanent = True
+                session['user_id'] = cs.get_user_details(email, 'email').user_id
+                session['filenames'] = []
+                return redirect(url_for(redirect_to))
+        
+        session['err_msg'] = "Wrong code, please try again."
+        return redirect(url_for('login'))
+    
+
     if 'email' not in session or 'next_station' not in session:
             return redirect(url_for('login'))
-        
+
     email = session['email']
-    redirect_to = session['next_station']    
+    redirect_to = session['next_station']
     code = tsa.generate_code(6)
+
+    auth_codes.append({'email': email, 'code': code})
     
     if not tsa.check_if_email_exists(email):
         session['err_msg'] = 'Email does not exist!'
-        return redirect(url_for('login'))
+        session.pop('email', None) # Clear session
+        session.pop('next_station', None)
+        return redirect(url_for(redirect_to))
     
     tsa.send_code(code, email)
 
@@ -71,16 +99,13 @@ def login():
         if ans['code'] == 'error':
             return render_template('login.html', err_msg=ans['msg'])
         else:
-            user = cs.get_user_details(ans['msg'])
+            user = cs.get_user_details(ans['msg'], 'user_id')
+            if not user:
+                return render_template('login.html', err_msg='No such user..')
             session['email'] = user.email  # Where to send
             session['next_station'] = 'files'  # Where to redirect
             return redirect(url_for('two_step_auth'))
-            # success
-            session.permanent = True
-            session['user_id'] = ans['msg'] 
-            session['filenames'] = []
-            return redirect(url_for('files'))
-    
+           
     err_msg = session.pop('err_msg', None)
     if err_msg:
         return render_template('login.html', err_msg=err_msg)
@@ -161,7 +186,7 @@ def delete_file(filename: str):
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    user = cs.get_user_details(session['user_id'])
+    user = cs.get_user_details(session['user_id'], 'user_id')
     if user:
         # Send in it parts because I don't want all the details
         # out there, sounds risky
