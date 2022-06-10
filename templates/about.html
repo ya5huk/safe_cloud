@@ -1,0 +1,61 @@
+{% extends "general.html" %} {% block title %} Not found {% endblock %} {% block
+content %}
+<style>
+  @counter-style repeating-emoji {
+    system: cyclic;
+    symbols: "\1F431""\1F436""\1F984"; // unicode code point
+    suffix: " ";
+  }
+
+  .repeating-counter-rule {
+    list-style-type: repeating-emoji;
+  }
+</style>
+<div
+  class="d-flex flex-column align-items-center text-center pt-5 gap-1 text-white"
+>
+  <h1 class="display-1">About 💡</h1>
+  <p class="lead fs-6">(Made this page to populate the navbar)</p>
+</div>
+<div
+  class="d-flex flex-column w-75 align-items-start text-center ps-5 gap-2 text-white"
+>
+  <h1 class="display-1">Me</h1>
+  <p class="text-start lead">
+    I am Ilan Yashuk, computer science & networks student. Soon I will finish
+    school, and to be very honest, have no idea what I'll do after it. I made
+    this website as a final project for school. I gotta stop writing. Next
+    section is more interesting.
+  </p>
+  <h1 class="display-1">Features</h1>
+  <p class="text-start lead">
+    SafeCloud is like google drive, but simpler and easier.<br />
+  </p>
+  <ul class="text-start" style="list-style-type: '🚀'">
+    <li>
+      <p class="text-white ps-2 fs-5 lead">
+        Delete & Download files with one click
+      </p>
+    </li>
+    <li>
+      <p class="text-white ps-2 fs-5 lead">
+        Add multiple files/zips with a single drag
+      </p>
+    </li>
+    <li>
+      <p class="text-white ps-2 fs-5 lead">Two step authentication</p>
+    </li>
+    <li>
+      <p class="text-white ps-2 fs-5 lead">Nice icon images</p>
+    </li>
+    <li>
+      <p class="text-white ps-2 fs-5 lead">
+        File database encrypting - only you can decrypt downloaded files
+      </p>
+    </li>
+  </ul>
+</div>
+<footer class="text-white lead d-flex p-2 justify-content-end">
+  <p>Created by Ilan Yashuk. © 2022</p>
+</footer>
+{% endblock %}

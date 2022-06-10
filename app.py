@@ -271,6 +271,10 @@ def configure_filename(filename: str, curr_filenames: list[str]):
     return saved_filename
     
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 # error pages ---------------
 
 @app.errorhandler(404)
@@ -282,7 +286,6 @@ app.register_error_handler(404, page_not_found)
 # TODO
 # 6. Features:
 #    security - encrypt files and decrypt with user-id f.e.
-#    zip - automatically directories
 # 7. Check error with file inserting, sometimes something weird happens with ids on delete
 # Bonus. design better
 
