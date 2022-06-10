@@ -1,6 +1,6 @@
 from datetime import datetime
 import sqlite3
-
+import threading
 from DBObjects import DBFile, DBUser
 
 class DBCommands:
@@ -8,6 +8,7 @@ class DBCommands:
         self.db_file_path = db_file_path
         self.db_con = sqlite3.connect(db_file_path, check_same_thread=False)
         self.cur = self.db_con.cursor() # Will be used to operate in db
+        self.lock = threading.Lock()
     
     def create_tables(self):
         self.cur.execute('''CREATE TABLE IF NOT EXISTS files
@@ -24,10 +25,14 @@ class DBCommands:
     # Files
     
     def add_file(self, file: DBFile):
-        self.cur.execute(f'''INSERT INTO files(file_id, in_dir, name, content, added_date)
-        values (?, ?, ?, ?, ?)''',
-        (file.file_id, '1' if file.in_dir else '0', file.name, file.content, str(file.added_date.strftime("%d/%m/%Y, %H:%M:%S"))))
-        self.db_con.commit()
+        try:
+            self.lock.acquire(True)
+            self.cur.execute(f'''INSERT INTO files(file_id, in_dir, name, content, added_date)
+            values (?, ?, ?, ?, ?)''',
+            (file.file_id, '1' if file.in_dir else '0', file.name, file.content, str(file.added_date.strftime("%d/%m/%Y, %H:%M:%S"))))
+            self.db_con.commit()
+        finally:
+            self.lock.release()
 
     def remove_file_by_name(self, filename: str):
         self.cur.execute(f'''DELETE FROM files WHERE name=:filename''', {'filename': filename})
@@ -102,37 +107,45 @@ class DBCommands:
         return True
     
     def get_user_files(self, user_id: str): # file_ids
-        self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
-        ans = self.cur.fetchall()
-        if len(ans) == 0: # empty list = no accounts
-            return None
-        
-        if ans[0][0] == '':
-            return []
-        else:
-            return ans[0][0].split(',')
-        
+        try:
+            self.lock.acquire(True)
+            self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
+            ans = self.cur.fetchall()
+            if len(ans) == 0: # empty list = no accounts
+                return None
+            
+            if ans[0][0] == '':
+                return []
+            else:
+                return ans[0][0].split(',')
+        finally:
+            self.lock.release()
+            
     def change_user_file_ids(self, user_id: str, file_id: str, change_type: str):
         if change_type not in ['remove', 'add']:
             return None
 
-        self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
-        ans = self.cur.fetchall()            
-        
-        if ans[0][0] == '':
-            self.cur.execute(f'''UPDATE users SET files=:file_id''', {'file_id': file_id})
+        try:
+            self.lock.acquire(True)
+            self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
+            ans = self.cur.fetchall()            
             
-        else:
-            files = ans[0][0].split(',')
-            if change_type == 'add':
-                files.append(file_id)
+            if ans[0][0] == '':
+                self.cur.execute(f'''UPDATE users SET files=:file_id''', {'file_id': file_id})
+                
             else:
-                files.remove(file_id)
-            new_files = ','.join(files)
-            self.cur.execute(f'''UPDATE users SET files=:new_files WHERE user_id=:user_id''',
-            {'new_files': new_files, 'user_id': user_id})
+                files = ans[0][0].split(',')
+                if change_type == 'add':
+                    files.append(file_id)
+                else:
+                    files.remove(file_id)
+                new_files = ','.join(files)
+                self.cur.execute(f'''UPDATE users SET files=:new_files WHERE user_id=:user_id''',
+                {'new_files': new_files, 'user_id': user_id})
 
-        self.db_con.commit()   
+            self.db_con.commit()   
+        finally:
+            self.lock.release()
 
     # Runs on deconstruction of object
     def __del__(self):

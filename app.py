@@ -170,19 +170,22 @@ def files():
         return render_template('files.html', files_data=files_data)
 
     if rq.method == 'POST':
+        icons_data = []
+        files_num = int(rq.form['length'])
+        for i in range(files_num):
+            
+            file = rq.files[f'files-{i}']
+            name = file.filename
+            content = file.stream.read()
+            # Manage duplicates, edits session['filenames']
+            saved_filename = configure_filename(name, session['filenames'])
+            file_id, file_icon_data = cs.add_file(False, saved_filename, content)
+            
+            # Update user's files
+            cs.add_file_to_user(session['user_id'], file_id)
+            icons_data.append({'data': file_icon_data.decode(), 'filename': saved_filename})
         
-        file = rq.files['file']
-        content = file.stream.read()  # Send stream over a socket
-
-        # Manage duplicates
-        saved_filename = configure_filename(file.filename, session['filenames'])
-        file_id, file_icon_data = cs.add_file(False, saved_filename, content)
-        
-        # Update user's files
-        cs.add_file_to_user(session['user_id'], file_id)
-
-
-        return jsonify({'data': file_icon_data.decode(), 'filename': saved_filename})
+        return jsonify(icons_data)
 
 
 @app.route('/files/download/<filename>')
@@ -247,8 +250,10 @@ def configure_filename(filename: str, curr_filenames: list[str]):
     ext = saved_filename.split('.')[-1]
     
     # Adding (duplicated file number) if needed
+    
     if saved_filename not in curr_filenames:
         curr_filenames.append(filename)
+        
     else:
         # turn name.ext -> name (counter).ext
         occurrences = 0
@@ -256,7 +261,7 @@ def configure_filename(filename: str, curr_filenames: list[str]):
             # we want to count 'filename' and 'filename (1)' for example
             # so filenames.count is not enough (we won't count the duplicated ones) 
             # regex finds files with struct -> filename (num).ext
-            if re.match(f'{actual_name}.* \(\d*\).{ext}', filename) != None or fn == filename:
+            if re.match(f'{actual_name}.* \(\d*\).{ext}', fn) != None or fn == filename:
                 occurrences += 1
         
         saved_filename = f'{actual_name} ({occurrences}).{ext}'

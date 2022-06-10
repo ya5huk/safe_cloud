@@ -151,68 +151,104 @@ content %}
 
   document.addEventListener("DOMContentLoaded", initApp);
 
+  const readFile = (file) => {
+    return new Promise((resolve, reject) => {
+      let fr = new FileReader()
+      fr.onload = () => {
+        resolve({filename: file.name, content: fr.result})
+      }
+      fr.onerror = reject;
+      fr.readAsArrayBuffer(file)
+    })
+  }
+
   const handleDrop = (e) => {
+    // To send multiple files we first drop the files, 
+    // Then read async, wait until all are read and then
+    // send it to server, server parses it and sends back
+    // icon images
+
+
     const dt = e.dataTransfer;
     const files = [...dt.files];
+    let read_files = []
 
+    let desiredLength = files.length;
+   
     for (const file of files) {
-      var reader = new FileReader();
-      const name = file.name;
-      reader.readAsArrayBuffer(file);
-      reader.onload = (evt) => {
-        const content = evt.target.result;
-        // Here we got content and name to send
-        formData = new FormData();
-        formData.append("file", new Blob([content]), name);
+      read_files.push(readFile(file))
+    }
 
-        $(document).ready(() => {
+    
+
+    
+    
+    Promise.all(read_files).then(files => {
+      let formData = new FormData();
+      let counter = 0
+      for (const file of files) {
+
+        formData.append(`files-${counter}`, new Blob([file.content]), file.filename);
+        counter++
+      }
+      formData.append('length', files.length)
+      return formData
+    }).then((fd) => {
+      
+      // formData is ready
+      // Sending arr of files
+      
+    $(document).ready(() => {
           $.ajax({
             url: "/files",
             type: "POST",
-            data: formData,
+            data: fd,
             processData: false,
             contentType: false,
-            success: (res) => {
-              const filesList = document.getElementById("files-list");
+            success: (icons_data) => {
+              icons_data.forEach(icd => {
+                const filesList = document.getElementById("files-list");
               // Copy hidden list item into li (prepared for file visuals)
               const li = document
                 .getElementById("filetemplate")
                 .cloneNode(true);
               li.hidden = false;
-              li.id = `${res.filename}-list-item`;
+              li.id = `${icd.filename}-list-item`;
 
               // Customizing objects -> filenames, fileicons, ext...
               const liParagraph = li.querySelectorAll(
                 '[id="filetemplateText"]'
               )[0];
-              liParagraph.innerHTML = res.filename;
-              liParagraph.id = `${res.filename}-file-body`;
+              liParagraph.innerHTML = icd.filename;
+              liParagraph.id = `${icd.filename}-file-body`;
 
               const liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
-              liImage.src = `data:image/png;base64, ${res.data}`;
-              liImage.id = `${res.filename}-file-icon`;
+              liImage.src = `data:image/png;base64, ${icd.data}`;
+              liImage.id = `${icd.filename}-file-icon`;
 
               // To enable frontend know what file he needs for this operations
               const liDownloadButton = li.querySelectorAll(
                 '[id="download-button-template"]'
               )[0];
-              liDownloadButton.id = `${res.filename}-download-button`;
+              liDownloadButton.id = `${icd.filename}-download-button`;
               const liDeleteButton = li.querySelectorAll(
                 '[id="delete-button-template"]'
               )[0];
-              liDeleteButton.id = `${res.filename}-delete-button`;
+              liDeleteButton.id = `${icd.filename}-delete-button`;
 
               // li.textContent = returnedFilename;
               filesList.appendChild(li);
+              })
+              
             },
           });
-        });
-      };
-      reader.onerror = (err) => {
-        console.log(err);
-      };
-    }
-  };
+        })
+        
+      })}   
+    
+        
+    
+  
 
   // A code to create temp a link to download file
   // https://stackoverflow.com/a/36899900/12432147
