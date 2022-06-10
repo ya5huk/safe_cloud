@@ -26,16 +26,17 @@ content %}
   }
 
   .selectarea {
-    background-color: #292b2c;
+    background-color: #234d23;
+    border-color :#337033
   }
 </style>
 <div class="container d-flex align-items-center justify-content-around my-5">
   <div class="d-flex justify-content-center pt-3">
     <h1 class="display-3 text-white">My files</h1>
   </div>
-  <section class="d-flex align-items-center justify-content-center droparea">
+  <section class="d-flex align-items-center justify-content-center droparea flex-column">
     <p class="text-white lead user-select-none" id="section-text">
-      Drop file to the lab 🔬
+      The lab 🔬
     </p>
   </section>
 </div>
@@ -123,13 +124,13 @@ content %}
     // Color border
     const active = () => {
       droparea.classList.add("selectarea");
-      document.getElementById("section-text").innerHTML = "right here buddy";
+      document.getElementById("section-text").innerHTML = "lemme eat 😋";
     };
 
     const inactive = () => {
       droparea.classList.remove("selectarea");
       document.getElementById("section-text").innerHTML =
-        "Drop file to the lab 🔬";
+        "The lab 🔬";
     };
 
     // Prevent default reload for all file-related events
@@ -168,7 +169,6 @@ content %}
     // send it to server, server parses it and sends back
     // icon images
 
-
     const dt = e.dataTransfer;
     const files = [...dt.files];
     let read_files = []
@@ -178,10 +178,6 @@ content %}
     for (const file of files) {
       read_files.push(readFile(file))
     }
-
-    
-
-    
     
     Promise.all(read_files).then(files => {
       let formData = new FormData();

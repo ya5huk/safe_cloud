@@ -280,7 +280,6 @@ def page_not_found(e):
 app.register_error_handler(404, page_not_found)
 
 # TODO
-# 5. Add a feature to add multiple files 
 # 6. Features:
 #    security - encrypt files and decrypt with user-id f.e.
 #    zip - automatically directories
