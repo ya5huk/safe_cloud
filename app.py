@@ -51,7 +51,7 @@ def register():
         password = rq.form['password']
         
 
-        ans = cs.register_possibility(username, email)
+        ans = cs.register_possibility(email, username)
         if ans['code'] == 'success':
             # 2step auth is unique for both login, signup
             # But session vars preperation is needed
@@ -87,8 +87,9 @@ def two_step_auth():
                 session.permanent = True
 
                 # Only in register -> Create an account
-                
+                print(user_action)
                 if user_action == 'register':
+                    print('registering')
                     password = session.pop('password')
                     username = session.pop('username')
 
@@ -274,8 +275,12 @@ def page_not_found(e):
 app.register_error_handler(404, page_not_found)
 
 # TODO
-# 5. Navigation buttons everywhere (so I can move from login to register f.e)
-# 6. Features: security - encrypt files and decrypt with user-id , zip automatically files, trash section 
+# 5. Add a feature to add multiple files 
+# 6. Features:
+#    security - encrypt files and decrypt with user-id f.e.
+#    zip - automatically directories
+# 7. Check error with file inserting, sometimes something weird happens with ids on delete
+# Bonus. design better
 
 
 if __name__ == '__main__':

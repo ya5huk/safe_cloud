@@ -60,6 +60,9 @@ class CloudServer:
 
     # Function registers a user and returns a msg accordingly
     def register(self, user_id: str, username: str, email: str, creation_date: datetime):
+        if self.register_possibility(email, username)['code'] == 'error':
+            print(f'User is already taken')
+            return
 
         usr = DBUser(user_id, username, email, creation_date, [])
         self.db.add_user(usr)
@@ -71,8 +74,8 @@ class CloudServer:
         # because enetering a username will fetch their email for unique code 
         # and db won't know what email to fetch
 
+        print(email,self.db.check_email_existance(email) )
         if self.db.check_email_existance(email): 
-            print(email, 'already exists!')
             return {'code': 'error', 'msg': f'{email} already exists!'}
         
         if self.db.check_username_existance(username):
