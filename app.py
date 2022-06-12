@@ -32,6 +32,7 @@ cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
 #   -> The only place where I send sensative info is in register
 #   -> where it is not very important to hide from the client the info
 #      he already entered...
+# .exe files -> Should be ok because reading files != executing files in 99$ of time (according to what I read)
 
 
 @app.route('/')
@@ -45,10 +46,16 @@ def register():
     # The weird microsec cutting causes problems in login so I cut it
     
 
-    if rq.method == 'POST':      
-        email = rq.form['email']
-        username = rq.form['username']
-        password = rq.form['password']
+    if rq.method == 'POST':   
+        req = print(rq.json)
+
+        email = req['email']
+        username = req['username']
+        password = req['password']
+        is_encrypted = req['encrypt']
+
+        if is_encrypted
+            pk = req['private_key']
         
 
         ans = cs.register_possibility(email, username)
@@ -284,8 +291,7 @@ def page_not_found(e):
 app.register_error_handler(404, page_not_found)
 
 # TODO
-# 6. Features:
-#    security - encrypt files and decrypt with user-id f.e.
+# 6. security - encrypt incoming files with client's private key (if he wants to)
 # 7. Check error with file inserting, sometimes something weird happens with ids on delete
 # Bonus. design better
 
