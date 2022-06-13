@@ -43,7 +43,7 @@ content %}
     visibility: hidden;
     opacity: 0;
     width: 300px;
-    background-color: rgb(45, 76, 99);
+    background-color: #714f20;
     color: #fff;
     text-align: center;
     border-radius: 5px;
@@ -75,8 +75,8 @@ content %}
 
       <input type="text" name="key_input" class="form-control bg-transparent lead text-white" style="width: 300px"
         id="inputSecretKey" placeholder="A secret between you and you." />
-      <small class="text-info fs-6 hovertext"
-        data-hover="Any inserted key here will be client-side decryption & encryption key. If you uploaded a file with this key, you must download with it. Note, that if you uploaded with a key and forgot it, you'll lose the file. This is the best encryption out there, but the price is this key.">
+      <small class="text-warning fs-6 hovertext" 
+        data-hover="Any inserted key here will be client-side decryption & encryption key. If you uploaded a file with this key, you must download with it. Note, that if you uploaded with a key and forgot it, you'll lose the file. This is *very* secure, because the data leaves your computer encrypted with a key only you in the whole world knows">
         An explanation just for you, dear.</small>
     </div>
 
@@ -325,6 +325,7 @@ content %}
           let decrypted = CryptoJS.AES.decrypt(byteCharacters, pk)
           let typedArray = convertWordArrayToUint8Array(decrypted);
           saveData(filename, `data:${extension}`, new Blob([typedArray]));
+          return false
         }
 
         const byteNumbers = new Array(byteCharacters.length);

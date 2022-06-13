@@ -62,7 +62,7 @@ class DBCommands:
     # Users
 
     def add_user(self, usr: DBUser):
-        self.cur.execute(f'''INSERT INTO users(user_id, username, email, creation_date, files, is_encrypted)
+        self.cur.execute(f'''INSERT INTO users(user_id, username, email, creation_date, files)
         values (?, ?, ?, ?, ?, ?)''',
         (usr.user_id,usr.username, usr.email, str(usr.creation_date.strftime("%d/%m/%Y, %H:%M:%S")), ','.join(usr.files)), '1' if usr.encryption_key else '0')
         self.db_con.commit()
@@ -88,7 +88,7 @@ class DBCommands:
             return None
 
         user = ans[0] # Should be only one user
-        userid, username, email, creation_date, files, is_encrypted = user # Splitting the tuple
+        userid, username, email, creation_date, files = user # Splitting the tuple
         return DBUser(userid, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
 
