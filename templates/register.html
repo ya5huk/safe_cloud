@@ -4,43 +4,12 @@
     border-color: #891a1a;
     box-shadow: 0 0 0 0.2rem rgba(137, 72, 25, 0.25);
   }
-
-  /* Only for encryption explanation */
-  /* https://sebhastian.com/html-hover-text/ */
-  .hovertext {
-    position: relative;
-    border-bottom: 1px dotted black;
-  }
-
-  .hovertext:before {
-    content: attr(data-hover);
-    visibility: hidden;
-    opacity: 0;
-    width: 300px;
-    background-color: rgb(45, 76, 99);
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 10px 5px;
-    transition: opacity 1s ease-in-out;
-
-    position: absolute;
-    z-index: 1;
-    left: 0;
-    top: 110%;
-  }
-
-  .hovertext:hover:before {
-    opacity: 1;
-    visibility: visible;
-  }
 </style>
 <div class="d-flex justify-content-center">
-  <div
+  <form
     class="d-flex flex-column align-items-center lead gap-3"
     style="width: 30%"
-    id="registerForm"
-    onsubmit="return submitRegisterForm(this)"
+    action="#"
     method="post"
   >
     <div class="w-100 form-group gap-2">
@@ -74,30 +43,6 @@
         placeholder="Won't see it anyway"
       />
     </div>
-    <div class="d-flex w-100 align-items-center gap-3 form-check form-switch">
-      <!-- https://bbbootstrap.com/snippets/bootstrap-notification-preferences-card-switch-toggle-buttons-19109147 -->
-      <input
-        class="form-check-input"
-        name="encryption_check"
-        value="encrypted"
-        type="checkbox"
-        id="encryptionSwitched"
-        checked
-      />
-      <label
-        id="switcherText"
-        class="form-check-label fs-6"
-        for="flexSwitchCheckChecked"
-      >
-        <span
-          class="hovertext"
-          data-hover="Even if site will be hacked only you
-        will have access to your files. The access is saved in your OS, rebooting
-        your computer or losing some enviorment variabless can cause File loss."
-          >File database encryption
-        </span>
-      </label>
-    </div>
     <div
       class="w-100 d-flex justify-content-between align-content-center form-group"
     >
@@ -111,7 +56,6 @@
             <a class="text-white" href="/login">Login</a>
           </p>
           <button
-            onclick="submitRegisterForm()"
             type="submit"
             value="submit"
             class="lead btn-custom text-white border rounded fs-6 bg-transparent border-danger"
@@ -121,34 +65,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </div>
-<script>
-  const submitRegisterForm = () => {
-    const username = document.getElementById("InputUsername").value;
-    const password = document.getElementById("InputPass").value;
-    const email = document.getElementById("InputEmail").value;
-    const isEncrypted = document.getElementById("encryptionSwitched").checked;
 
-    if (isEncrypted) {
-      // Generate private key
-    }
-
-    $.ajax({
-      url: "#",
-      type: "POST",
-      data: JSON.stringify({
-        username: username,
-        email: email,
-        password: password,
-        encrypt: isEncrypted,
-      }),
-      contentType: "application/json;",
-      error: (err) => {
-        console.log(err);
-      },
-    });
-    return false;
-  };
-</script>
 {% endblock %}
