@@ -112,7 +112,7 @@ class DBCommands:
             self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
             ans = self.cur.fetchall()
             if len(ans) == 0: # empty list = no accounts
-                return None
+                return []
             
             if ans[0][0] == '':
                 return []

@@ -39,7 +39,7 @@ cs = CloudServer(DB_FILENAME, EXTENSION_ICONS_PATH)
 def home():
     if 'user_id' in session:
         return redirect(url_for('files'))
-    return render_template('index.html')
+    return redirect(url_for('login'))
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -158,7 +158,6 @@ def files():
         # Fetch user's files 
         user_id = session['user_id']
         filenames = cs.get_user_filenames(user_id)
-        
         session['filenames'] = filenames
         
         files_data = []
