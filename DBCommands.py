@@ -15,7 +15,7 @@ class DBCommands:
         (file_id text primary key, in_dir integer, name text, content blob, added_date text)''')
 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS users
-        (user_id text primary key, username text, email text, creation_date text, files text)''')
+        (user_id text primary key, username text, email text, creation_date text, files text, encryption_key text)''')
 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS dirs
         (dir_id text primary key, name text, files text)''')
@@ -62,9 +62,9 @@ class DBCommands:
     # Users
 
     def add_user(self, usr: DBUser):
-        self.cur.execute(f'''INSERT INTO users(user_id, username, email, creation_date, files)
-        values (?, ?, ?, ?, ?)''',
-        (usr.user_id,usr.username, usr.email, str(usr.creation_date.strftime("%d/%m/%Y, %H:%M:%S")), ','.join(usr.files)))
+        self.cur.execute(f'''INSERT INTO users(user_id, username, email, creation_date, files, is_encrypted)
+        values (?, ?, ?, ?, ?, ?)''',
+        (usr.user_id,usr.username, usr.email, str(usr.creation_date.strftime("%d/%m/%Y, %H:%M:%S")), ','.join(usr.files)), '1' if usr.encryption_key else '0')
         self.db_con.commit()
     
     def remove_user_by_username(self, username: str):
@@ -88,7 +88,7 @@ class DBCommands:
             return None
 
         user = ans[0] # Should be only one user
-        userid, username, email, creation_date, files = user # Splitting the tuple
+        userid, username, email, creation_date, files, is_encrypted = user # Splitting the tuple
         return DBUser(userid, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
 

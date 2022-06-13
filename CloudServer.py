@@ -24,7 +24,7 @@ class CloudServer:
     # Fucntion adds a file to database and returns it's supposed icon in base64
     def add_file(self, in_dir: bool, filename: str, content: bytes):
         file_id = str(uuid.uuid1()) # By timestamp
-        creation_time = datetime.now()      
+        creation_time = datetime.now()
         file = DBFile(file_id, in_dir, filename, content, creation_time)
         
         print('Adding file: ', file)
@@ -49,7 +49,7 @@ class CloudServer:
         if content == None:
             print("Didn't receive anything from file, should get an error")
 
-        return base64.b64encode(content)
+        return content
 
     # Function deletes file with a give filename
     def delete_file_by_value(self, value: str, value_type: str):

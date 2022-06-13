@@ -1,3 +1,4 @@
+from base64 import b64encode
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, session, redirect, url_for, render_template, request as rq
 from flask_session import Session # Server-side session
@@ -177,6 +178,8 @@ def files():
             file = rq.files[f'files-{i}']
             name = file.filename
             content = file.stream.read()
+            print
+            
             # Manage duplicates, edits session['filenames']
             saved_filename = configure_filename(name, session['filenames'])
             file_id, file_icon_data = cs.add_file(False, saved_filename, content)
@@ -199,7 +202,8 @@ def download_file(filename: str):
         if cs.get_filename(fid) == filename:
             # Found relevant file, so I can download it 
             content = cs.return_file_content_by_id(fid)
-            return content
+            
+            return b64encode(content)
     return redirect(url_for('login')) # If file wasn't found
 
 @app.route('/files/delete/<filename>')
@@ -286,8 +290,7 @@ app.register_error_handler(404, page_not_found)
 # TODO
 # 6. Features:
 #    security - encrypt files and decrypt with user-id f.e.
-# 7. Check error with file inserting, sometimes something weird happens with ids on delete
-# Bonus. design better
+# 7.TLS for moving data
 
 
 if __name__ == '__main__':

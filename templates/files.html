@@ -17,6 +17,7 @@ content %}
     margin-top: 1rem;
   }
 
+  /* For file dropping */
   .droparea {
     width: 384px;
     max-width: 100%;
@@ -27,18 +28,59 @@ content %}
 
   .selectarea {
     background-color: #234d23;
-    border-color :#337033
+    border-color: #337033
+  }
+
+  /* Only for encryption explanation */
+  /* https://sebhastian.com/html-hover-text/ */
+  .hovertext {
+    position: relative;
+    border-bottom: 1px dotted black;
+  }
+
+  .hovertext:before {
+    content: attr(data-hover);
+    visibility: hidden;
+    opacity: 0;
+    width: 300px;
+    background-color: rgb(45, 76, 99);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 10px 5px;
+    transition: opacity 1s ease-in-out;
+
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    top: 110%;
+  }
+
+  .hovertext:hover:before {
+    opacity: 1;
+    visibility: visible;
   }
 </style>
-<div class="container d-flex align-items-center justify-content-around my-5">
-  <div class="d-flex justify-content-center pt-3">
-    <h1 class="display-3 text-white">My files</h1>
-  </div>
-  <section class="d-flex align-items-center justify-content-center droparea flex-column">
+<div class="d-flex flex-wrap px-5 align-items-center justify-content-between my-5">
+  <h1 class="display-3 text-white">My files</h1>
+  <section class="d-flex flex-grow-1 mx-5 align-items-center justify-content-center droparea flex-column">
     <p class="text-white lead user-select-none" id="section-text">
-      The lab 🔬
+      The lab 🔬 (drop on me)
     </p>
   </section>
+  <div class="d-flex flex-column text-white lead">
+
+    <div class="d-flex flex-column align-items-start form-group gap-2">
+      <label for="inputUser">Private key</label>
+
+      <input type="text" name="key_input" class="form-control bg-transparent lead text-white" style="width: 300px"
+        id="inputSecretKey" placeholder="A secret between you and you." />
+      <small class="text-info fs-6 hovertext"
+        data-hover="Any inserted key here will be client-side decryption & encryption key. If you uploaded a file with this key, you must download with it. Note, that if you uploaded with a key and forgot it, you'll lose the file. This is the best encryption out there, but the price is this key.">
+        An explanation just for you, dear.</small>
+    </div>
+
+  </div>
 </div>
 <ul class="d-flex flex-wrap gap-5" id="files-list">
   <!-- Example li -->
@@ -46,31 +88,17 @@ content %}
     <div class="d-flex align-items-center card bg-transparent border-0">
       <img id="filetemplate-img" class="card-img-top" src="static/_blank.png" />
       <div class="card-body p-0 pt-1">
-        <p
-          class="card-text text-white lead overflow-auto"
-          style="font-size: 15px"
-          id="filetemplateText"
-        >
+        <p class="card-text text-white lead overflow-auto" style="font-size: 15px" id="filetemplateText">
           filename.txt
         </p>
       </div>
-      <div
-        class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0"
-      >
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
-          style="width: 40%"
-          id="delete-button-template"
-          onclick="deleteFile(this.id)"
-        >
+      <div class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0">
+        <button class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm" style="width: 40%"
+          id="delete-button-template" onclick="deleteFile(this.id)">
           <img src="static/bin.png" width="100%" />
         </button>
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
-          style="width: 40%"
-          id="download-button-template"
-          onclick="downloadFile(this.id)"
-        >
+        <button class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm" style="width: 40%"
+          id="download-button-template" onclick="downloadFile(this.id)">
           <img src="static/download_icon.png" width="100%" />
         </button>
       </div>
@@ -82,31 +110,17 @@ content %}
     <div class="d-flex align-items-center card bg-transparent border-0">
       <img id="{{fd["name"]}}-file-icon" class="card-img-top" src={{fd["icon_data"]}} />
       <div class="card-body p-0 pt-1">
-        <p
-          class="card-text text-white lead overflow-auto"
-          style="font-size: 15px"
-          id="{{fd["name"]}}-file-body"
-        >
+        <p class="card-text text-white lead overflow-auto" style="font-size: 15px" id="{{fd["name"]}}-file-body">
           {{fd["name"]}}
         </p>
       </div>
-      <div
-        class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0"
-      >
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm"
-          style="width: 40%"
-          id="{{fd["name"]}}-delete-button"
-          onclick="deleteFile(this.id)"
-        >
+      <div class="card-footer d-flex justify-content-around text-white pt-1 p-0 m-0">
+        <button class="d-flex align-items-center justify-content-center btn btn-danger lead btn-sm" style="width: 40%"
+          id="{{fd["name"]}}-delete-button" onclick="deleteFile(this.id)">
           <img src="static/bin.png" width="100%" />
         </button>
-        <button
-          class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm"
-          style="width: 40%"
-          id="{{fd["name"]}}-download-button"
-          onclick="downloadFile(this.id)"
-        >
+        <button class="d-flex align-items-center justify-content-center btn btn-success lead btn-sm" style="width: 40%"
+          id="{{fd["name"]}}-download-button" onclick="downloadFile(this.id)">
           <img src="static/download_icon.png" width="100%" />
         </button>
       </div>
@@ -115,9 +129,10 @@ content %}
   {% endfor %}
 </ul>
 <script>
-  // thanks to https://www.youtube.com/watch?v=9Xh_ZpFkROI
-  const getImageByName = (filename) => {};
+  
+  let PrivateKeyInput = document.getElementById('inputSecretKey')
 
+  // thanks to https://www.youtube.com/watch?v=9Xh_ZpFkROI
   const initApp = () => {
     const droparea = document.querySelector(".droparea");
 
@@ -163,12 +178,50 @@ content %}
     })
   }
 
+  const addFileIconItem = (iconData) => {
+
+    const filesList = document.getElementById("files-list");
+    // Copy hidden list item into li (prepared for file visuals)
+    const li = document
+      .getElementById("filetemplate")
+      .cloneNode(true);
+    li.hidden = false;
+    li.id = `${iconData.filename}-list-item`;
+
+    // Customizing objects -> filenames, fileicons, ext...
+    const liParagraph = li.querySelectorAll(
+      '[id="filetemplateText"]'
+    )[0];
+    liParagraph.innerHTML = iconData.filename;
+    liParagraph.id = `${iconData.filename}-file-body`;
+
+    const liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
+    liImage.src = `data:image/png;base64, ${iconData.data}`;
+    liImage.id = `${iconData.filename}-file-icon`;
+
+    // To enable frontend know what file he needs for this operations
+    const liDownloadButton = li.querySelectorAll(
+      '[id="download-button-template"]'
+    )[0];
+    liDownloadButton.id = `${iconData.filename}-download-button`;
+    const liDeleteButton = li.querySelectorAll(
+      '[id="delete-button-template"]'
+    )[0];
+    liDeleteButton.id = `${iconData.filename}-delete-button`;
+
+    // li.textContent = returnedFilename;
+    filesList.appendChild(li);
+  }
+          
+        
+
   const handleDrop = (e) => {
     // To send multiple files we first drop the files, 
     // Then read async, wait until all are read and then
     // send it to server, server parses it and sends back
     // icon images
 
+    const pk = PrivateKeyInput.value;
     const dt = e.dataTransfer;
     const files = [...dt.files];
     let read_files = []
@@ -183,8 +236,17 @@ content %}
       let formData = new FormData();
       let counter = 0
       for (const file of files) {
+        if (pk != '') {
+          // AES client-side encryption is needed
+          let wordArray = CryptoJS.lib.WordArray.create(file.content);
+          let encrypted = CryptoJS.AES.encrypt(wordArray, pk).toString();
+          formData.append(`files-${counter}`, new Blob([encrypted]), file.filename);
+        } 
+        else {
+          
+          formData.append(`files-${counter}`, new Blob([file.content]), file.filename);
+        }
 
-        formData.append(`files-${counter}`, new Blob([file.content]), file.filename);
         counter++
       }
       formData.append('length', files.length)
@@ -203,48 +265,14 @@ content %}
             contentType: false,
             success: (icons_data) => {
               icons_data.forEach(icd => {
-                const filesList = document.getElementById("files-list");
-              // Copy hidden list item into li (prepared for file visuals)
-              const li = document
-                .getElementById("filetemplate")
-                .cloneNode(true);
-              li.hidden = false;
-              li.id = `${icd.filename}-list-item`;
 
-              // Customizing objects -> filenames, fileicons, ext...
-              const liParagraph = li.querySelectorAll(
-                '[id="filetemplateText"]'
-              )[0];
-              liParagraph.innerHTML = icd.filename;
-              liParagraph.id = `${icd.filename}-file-body`;
-
-              const liImage = li.querySelectorAll('[id="filetemplate-img"]')[0];
-              liImage.src = `data:image/png;base64, ${icd.data}`;
-              liImage.id = `${icd.filename}-file-icon`;
-
-              // To enable frontend know what file he needs for this operations
-              const liDownloadButton = li.querySelectorAll(
-                '[id="download-button-template"]'
-              )[0];
-              liDownloadButton.id = `${icd.filename}-download-button`;
-              const liDeleteButton = li.querySelectorAll(
-                '[id="delete-button-template"]'
-              )[0];
-              liDeleteButton.id = `${icd.filename}-delete-button`;
-
-              // li.textContent = returnedFilename;
-              filesList.appendChild(li);
+                addFileIconItem(icd)
               })
-              
-            },
-          });
+            }
+          })
         })
-        
-      })}   
-    
-        
-    
-  
+      })
+    }
 
   // A code to create temp a link to download file
   // https://stackoverflow.com/a/36899900/12432147
@@ -263,18 +291,42 @@ content %}
     a.remove();
   }
 
+  // Big thanks to https://stackoverflow.com/a/60550134/12432147
+  // for explaining the AES dec & enc 
+  // word array is to use 32/64 bit instead of 8-bit arrays
+  // this is for cryptography optimization 
+  const convertWordArrayToUint8Array = (wordArray) => {
+    var arrayOfWords = wordArray.hasOwnProperty("words") ? wordArray.words : [];
+    var length = wordArray.hasOwnProperty("sigBytes") ? wordArray.sigBytes : arrayOfWords.length * 4;
+    var uInt8Array = new Uint8Array(length), index=0, word, i;
+    for (i=0; i<length; i++) {
+        word = arrayOfWords[i];
+        uInt8Array[index++] = word >> 24;
+        uInt8Array[index++] = (word >> 16) & 0xff;
+        uInt8Array[index++] = (word >> 8) & 0xff;
+        uInt8Array[index++] = word & 0xff;
+    }
+    return uInt8Array;
+}
+
   const downloadFile = (id) => {
     // Finding filename & extension from set id
-    filename = id.slice(0, id.length - "-download-button".length);
-    sliced = filename.split(".");
-    extension = sliced[sliced.length - 1];
-
+    const filename = id.slice(0, id.length - "-download-button".length);
+    const sliced = filename.split(".");
+    const extension = sliced[sliced.length - 1];
+    const pk = PrivateKeyInput.value;
     $.ajax({
       url: `/files/download/${filename}`,
       type: "GET",
       success: (res) => {
-        // Convert base64 to blob
         const byteCharacters = atob(res);
+        // Convert base64 to blob
+        if (pk != '') {
+          let decrypted = CryptoJS.AES.decrypt(byteCharacters, pk)
+          let typedArray = convertWordArrayToUint8Array(decrypted);
+          saveData(filename, `data:${extension}`, new Blob([typedArray]));
+        }
+
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -287,7 +339,6 @@ content %}
   };
 
   const deleteFile = (id) => {
-    console.log(id);
     filename = id.slice(0, id.length - "-delete-button".length);
     $.ajax({
       url: `/files/delete/${filename}`,
