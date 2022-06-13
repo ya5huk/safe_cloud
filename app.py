@@ -287,11 +287,7 @@ def page_not_found(e):
 
 app.register_error_handler(404, page_not_found)
 
-# TODO
-# 6. Features:
-#    security - encrypt files and decrypt with user-id f.e.
-# 7.TLS for moving data
-
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    # For SSL encryption a purchasable certificate is needed
+    # as well as domain
+    app.run(debug=True, )

@@ -1,8 +1,11 @@
-# Own addition
-private/
+# Docx/Draw.io Temp files
+.$*
+~*
 
 # Shouldn't be open to public
 flask_session/ 
+
+# 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
