@@ -130,6 +130,7 @@ class DBCommands:
             self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
             ans = self.cur.fetchall()            
             
+
             if ans[0][0] == '':
                 self.cur.execute(f'''UPDATE users SET files=:file_id''', {'file_id': file_id})
                 

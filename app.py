@@ -44,7 +44,6 @@ def home():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     # The weird microsec cutting causes problems in login so I cut it
-    
 
     if rq.method == 'POST':      
         email = rq.form['email']
@@ -88,7 +87,6 @@ def two_step_auth():
                 session.permanent = True
 
                 # Only in register -> Create an account
-                print(user_action)
                 if user_action == 'register':
                     print('registering')
                     password = session.pop('password')
@@ -177,7 +175,6 @@ def files():
             file = rq.files[f'files-{i}']
             name = file.filename
             content = file.stream.read()
-            print
             
             # Manage duplicates, edits session['filenames']
             saved_filename = configure_filename(name, session['filenames'])

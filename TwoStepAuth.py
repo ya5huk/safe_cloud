@@ -2,7 +2,7 @@ import random
 import requests
 from smtplib import SMTP_SSL
 from email.mime.text import MIMEText
-from decouple import config
+from decouple import config  # For enviorment variables
 
 class TwoStepAuth:
     def __init__(self, sender_email: str):
