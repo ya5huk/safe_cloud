@@ -286,4 +286,4 @@ app.register_error_handler(404, page_not_found)
 if __name__ == '__main__':
     # For SSL encryption a purchasable certificate is needed
     # as well as domain
-    app.run(debug=True, )
+    app.run(debug=True)

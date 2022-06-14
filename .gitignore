@@ -4,8 +4,7 @@
 
 # Shouldn't be open to public
 flask_session/ 
-
-# 
+database.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
