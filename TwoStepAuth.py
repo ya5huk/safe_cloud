@@ -13,7 +13,9 @@ class TwoStepAuth:
         # Create .env for these
         self.username = config('EMAIL_USERNAME')
         self.password = config('EMAIL_PASSWORD')
-        print(f'Trying to log in with {self.username}, {self.password}... ', end='')
+
+        hidden_pass = self.password[:5] + '*'*(len(self.password) - 5) # So users can't see full pass
+        print(f'Trying to log in with {self.username}, {hidden_pass}... ', end='')
         
         self.conn = SMTP_SSL(self.smtp_server, 465)
         self.conn.set_debuglevel(False)

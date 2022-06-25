@@ -12,13 +12,12 @@ class DBFile:
         return f'{self.file_id} -> {self.name}, {self.added_date}'
 
 class DBUser:
-    def __init__(self, user_id: str, username: str, email: str, creation_date: datetime.datetime, files: list[str], encryption_key=''):
+    def __init__(self, user_id: str, username: str, email: str, creation_date: datetime.datetime, files: list[str]):
         self.user_id = user_id
         self.username = username
         self.email = email
         self.creation_date = creation_date
         self.files = files
-        self.encryption_key = encryption_key
 
     def __repr__(self):
         return f'{self.user_id} -> {self.username} ({self.email})'

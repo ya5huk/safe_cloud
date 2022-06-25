@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import sqlite3
 import threading
 from DBObjects import DBFile, DBUser
@@ -15,7 +16,7 @@ class DBCommands:
         (file_id text primary key, in_dir integer, name text, content blob, added_date text)''')
 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS users
-        (user_id text primary key, username text, email text, creation_date text, files text, encryption_key text)''')
+        (user_id text primary key, username text, email text, creation_date text, files text)''')
 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS dirs
         (dir_id text primary key, name text, files text)''')
@@ -63,8 +64,8 @@ class DBCommands:
 
     def add_user(self, usr: DBUser):
         self.cur.execute(f'''INSERT INTO users(user_id, username, email, creation_date, files)
-        values (?, ?, ?, ?, ?, ?)''',
-        (usr.user_id,usr.username, usr.email, str(usr.creation_date.strftime("%d/%m/%Y, %H:%M:%S")), ','.join(usr.files)), '1' if usr.encryption_key else '0')
+        values (?, ?, ?, ?, ?)''',
+        (usr.user_id,usr.username, usr.email, str(usr.creation_date.strftime("%d/%m/%Y, %H:%M:%S")), ','.join(usr.files)))
         self.db_con.commit()
     
     def remove_user_by_username(self, username: str):
@@ -88,6 +89,7 @@ class DBCommands:
             return None
 
         user = ans[0] # Should be only one user
+        print(ans)
         userid, username, email, creation_date, files = user # Splitting the tuple
         return DBUser(userid, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
@@ -128,19 +130,21 @@ class DBCommands:
         try:
             self.lock.acquire(True)
             self.cur.execute(f'''SELECT files FROM users WHERE user_id=:user_id''', {'user_id': user_id})
-            ans = self.cur.fetchall()            
-            
+            ans = self.cur.fetchall()
 
-            if ans[0][0] == '':
-                self.cur.execute(f'''UPDATE users SET files=:file_id''', {'file_id': file_id})
-                
+            if len(ans) > 0 and ans[0][0] == '':
+                self.cur.execute(f'''UPDATE users SET files=:file_id WHERE user_id=:user_id''', {'file_id': file_id, 'user_id': user_id})
             else:
                 files = ans[0][0].split(',')
+                
+                
                 if change_type == 'add':
                     files.append(file_id)
                 else:
                     files.remove(file_id)
                 new_files = ','.join(files)
+
+                
                 self.cur.execute(f'''UPDATE users SET files=:new_files WHERE user_id=:user_id''',
                 {'new_files': new_files, 'user_id': user_id})
 
@@ -158,7 +162,16 @@ class DBCommands:
         
 
 if __name__ == "__main__":
+    os.remove('./database.db')
+
     db = DBCommands('./database.db')
     db.create_tables()
-    print(db.check_username_existance('r'))
+    db.add_user(DBUser('u1', 'ilan', 'something@gm.com', datetime.now(), ''))
+    for i in range(4):
+        db.change_user_file_ids('u1', f'f{i}', 'add')
+    
+    db.add_user(DBUser('u2', 'ron', 'something2@gm.com', datetime.now(), ''))
+    for i in range(4):
+        db.change_user_file_ids('u2', f'ff{i}', 'add')
+    
     

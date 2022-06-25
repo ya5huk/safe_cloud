@@ -149,8 +149,11 @@ def login():
 
 @app.route('/files', methods=['POST', 'GET'])
 def files():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    if 'user_id' not in session or cs.get_user_details(session['user_id'], 'user_id') == None:  # To check if user really exists
+        # For some reason if a deleted account is logged in
+        session.clear()
+        return redirect(url_for('logout'))
+
 
     if rq.method == 'GET':
         # Fetch user's files 
@@ -189,7 +192,7 @@ def files():
 
 @app.route('/files/download/<filename>')
 def download_file(filename: str):
-    if 'user_id' not in session:
+    if 'user_id' not in session or cs.get_user_details(session['user_id'], 'user_id') == None:  # To check if user really exists
         return redirect(url_for('login'))
     # Search for filename among only the logged account
     files_id = cs.get_user_file_ids(session['user_id'])
@@ -204,7 +207,7 @@ def download_file(filename: str):
 
 @app.route('/files/delete/<filename>')
 def delete_file(filename: str):
-    if 'user_id' not in session:
+    if 'user_id' not in session or cs.get_user_details(session['user_id'], 'user_id') == None:  # To check if user really exists
         return redirect(url_for('login'))
     # Search for filename among only the logged account
     files_id = cs.get_user_file_ids(session['user_id'])
@@ -223,7 +226,7 @@ def delete_file(filename: str):
 
 @app.route('/profile')
 def profile():
-    if 'user_id' not in session:
+    if 'user_id' not in session or cs.get_user_details(session['user_id'], 'user_id') == None:  # To check if user really exists
         return redirect(url_for('login'))
     user = cs.get_user_details(session['user_id'], 'user_id')
     if user:
@@ -238,9 +241,7 @@ def profile():
 
 @app.route('/logout')
 def logout():
-    if 'user_id' in session:
-        session.pop('user_id', None)
-        session.pop('filenames', None)
+    session.clear()
     return redirect(url_for('login'))
 
 
