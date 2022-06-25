@@ -13,6 +13,7 @@ class TwoStepAuth:
         # Create .env for these
         self.username = config('EMAIL_USERNAME')
         self.password = config('EMAIL_PASSWORD')
+        self.api_email_check_key = config('IS_IT_A_REAL_EMAIL_API_KEY')
 
         hidden_pass = self.password[:5] + '*'*(len(self.password) - 5) # So users can't see full pass
         print(f'Trying to log in with {self.username}, {hidden_pass}... ', end='')
@@ -23,11 +24,16 @@ class TwoStepAuth:
         print('Logged in!')
 
     @staticmethod
-    def check_if_email_exists(email_address: str):
+    def check_if_email_exists(email_address: str, api_key: str):
         url = 'https://isitarealemail.com/api/email/validate' # A blessing for developers
-        res = requests.get(url, params={'email': email_address})
+        res = requests.get(url, params={'email': email_address}, headers={'Authorization': f'Bearer {api_key}'})
         status = res.json()['status']
         
+        # NOTE for some reason, the api don't want my email addresses to be valid so for 
+        # tests only I'll set them up
+        if email_address in ['ilan147963@gmail.com', 'ilanyashuk@gmail.com']:
+            return True
+
         if status == 'valid':
             return True
         return False

@@ -89,7 +89,6 @@ class DBCommands:
             return None
 
         user = ans[0] # Should be only one user
-        print(ans)
         userid, username, email, creation_date, files = user # Splitting the tuple
         return DBUser(userid, username, email, datetime.strptime(creation_date, "%d/%m/%Y, %H:%M:%S"), files.split(','))
         
@@ -162,6 +161,7 @@ class DBCommands:
         
 
 if __name__ == "__main__":
+    # Testing register of 2 accounts and adding file
     os.remove('./database.db')
 
     db = DBCommands('./database.db')

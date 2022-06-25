@@ -114,7 +114,7 @@ def two_step_auth():
 
     email = session['email']
 
-    if not tsa.check_if_email_exists(email):
+    if not tsa.check_if_email_exists(email, tsa.api_email_check_key):
         session['err_msg'] = 'Email does not exist!'
         session.pop('email', None) # Clear session
         return redirect(rq.referrer)
@@ -128,6 +128,9 @@ def two_step_auth():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    if 'user_id' in session and cs.get_user_details(session['user_id'], 'user_id') != None:  # To check if user really exists
+        redirect(url_for('files'))
+
     if rq.method == 'POST':
         usr_input = rq.form['user_input']
         usr_pass = rq.form['password']
