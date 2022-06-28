@@ -28,7 +28,7 @@ Initialize relevant environment variables in a file `.env` (Add the file yoursel
 
 Finally, run the app using
 `py app.py` or `python app.py`
-and enter `127.0.0.1:5000`
+and enter `http://127.0.0.1:5000/`
 
 
 ## Main Technologies
