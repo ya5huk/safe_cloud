@@ -29,11 +29,8 @@ class TwoStepAuth:
         res = requests.get(url, params={'email': email_address}, headers={'Authorization': f'Bearer {api_key}'})
         status = res.json()['status']
         
-        # NOTE for some reason, the api don't want my email addresses to be valid so for 
-        # tests only I'll set them up
-        if email_address in ['ilan147963@gmail.com', 'ilanyashuk@gmail.com']:
-            return True
-
+		# NOTE api is not consistant for reasons that are not under my controls. 
+		# For producion use, I would use another email-validator api
         if status == 'valid':
             return True
         return False
