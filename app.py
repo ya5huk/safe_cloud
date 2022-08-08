@@ -6,6 +6,7 @@ from CloudServer import CloudServer
 from TwoStepAuth import TwoStepAuth
 import CloudEncrypt 
 import re, os
+import hashlib
 
 DB_FILENAME = os.path.abspath('./database.db')
 EXTENSION_ICONS_PATH = os.path.abspath('./images/extension_icons') + '/'
@@ -70,6 +71,7 @@ def register():
 
 @app.route('/two-step-auth', methods=['POST', 'GET'])
 def two_step_auth():
+    user_agent = hashlib.md5(rq.headers.get('User-Agent').encode()).hexdigest() # User Agent token
     redirect_to = 'files' # Where after 2step auth succeeds
     
     if rq.method == 'POST':
@@ -103,6 +105,11 @@ def two_step_auth():
                     session['user_id'] = cs.get_user_details(email, 'email').user_id # as a setup to /files
                 
                 session['filenames'] = []
+
+                # Reload trusted agent (to give new time)
+                cs.delete_trusted_agent(session['user_id'], user_agent)
+                cs.add_trusted_agent(session['user_id'], user_agent)
+
                 return redirect(url_for(redirect_to))
         
         session['err_msg'] = "Wrong code, please try again."
@@ -128,6 +135,8 @@ def two_step_auth():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    user_agent = hashlib.md5(rq.headers.get('User-Agent').encode()).hexdigest() # User Agent token
+
     if 'user_id' in session and cs.get_user_details(session['user_id'], 'user_id') != None:  # To check if user really exists
         redirect(url_for('files'))
 
@@ -141,6 +150,17 @@ def login():
             user = cs.get_user_details(ans['msg'], 'user_id')
             if not user:
                 return render_template('login.html', err_msg='No such user..')
+            
+            # Checking if user-agent is familiar
+            for ta in user.trusted_agents:
+                if ta == '':
+                    break
+                agent, timestamp = ta.split('|')
+                if user_agent == agent:
+                    # Prep for /files
+                    session['user_id'] = user.user_id
+
+                    return redirect(url_for('files'))
             session['email'] = user.email  # Where to send
             return redirect(url_for('two_step_auth'))
            

@@ -1,11 +1,12 @@
 from datetime import datetime
-import json
+import time
 from DBCommands import DBCommands
 from DBObjects import DBFile, DBUser
 import uuid
 import base64
 from IconGrabber import IconGrabber
 from CloudEncrypt import hashify_user
+import threading
 class Codes:
     ADD_FILE = '101'
     GET_FILE_CONTENT = '102'
@@ -20,6 +21,12 @@ class CloudServer:
         self.db = DBCommands(db_filename)
         self.db.create_tables() # Doesn't do anything if exists
         self.icon_grabber = IconGrabber(extension_icons_path)
+
+        # Filtering user-agents thread
+        run_every_seconds = 10
+        outdated_days_count = 15
+        ut = threading.Thread(target=self.reload_trusted_agents, args=(outdated_days_count, run_every_seconds))
+        ut.start()
 
     # Fucntion adds a file to database and returns it's supposed icon in base64
     def add_file(self, in_dir: bool, filename: str, content: bytes):
@@ -64,7 +71,7 @@ class CloudServer:
             print(f'User is already taken')
             return
 
-        usr = DBUser(user_id, username, email, creation_date, [])
+        usr = DBUser(user_id, username, email, creation_date, [], [])
         self.db.add_user(usr)
         print(f'Registered {user_id} as {username} ({email})')
 
@@ -126,6 +133,19 @@ class CloudServer:
 
     def get_user_details(self, value: str, value_type: str):
         return self.db.get_user_details_by_value(value, value_type)
+
+    # Trusted Agents
+    def add_trusted_agent(self, user_id: str, agent: str):
+        self.db.change_user_agents_status(user_id, agent, 'add')
+
+    def delete_trusted_agent(self, user_id: str, agent: str):
+        self.db.change_user_agents_status(user_id, agent, 'remove')
+    
+    # Function should run in a thread, and every :reload_every: seconds delete old trust agents
+    def reload_trusted_agents(self, interval_days: int, reload_every: int):
+        while True:
+            self.db.filter_user_agents(interval_days)
+            time.sleep(reload_every)
 
 if __name__ == '__main__':
     cs = CloudServer('127.0.0.1', 8081)
